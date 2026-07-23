@@ -1,0 +1,274 @@
+% =============================================================
+%  SECTION III — THREAT MODEL AND PROBLEM FORMULATION
+%  Artigo: Scaling Laws for Cyber Resilience
+%  Autor:  Allan Douglas Costa | UFRA | LICA/CCAD-IA
+%  Status: DRAFT v0.1 — núcleo técnico
+% =============================================================
+
+\section{Threat Model and Problem Formulation}
+\label{sec:threat}
+
+% -----------------------------------------------------------
+\subsection{Adversary Model}
+\label{sec:adversary}
+
+We adopt a threat model consistent with the supply-chain backdoor scenario
+formalized by Gu~et~al.~\cite{gu2019badnets} and extended to the
+large language model (LLM) setting by Yang~et~al.~\cite{yang2024shadow}.
+We define the adversary $\mathcal{A}$ by four axes:
+
+\begin{itemize}
+  \item \textbf{Capability:} $\mathcal{A}$ has write access to a fraction
+        $\rho \in (0, 1)$ of the pre-training corpus $\mathcal{C}$, injecting
+        poisoned samples $\tilde{\mathcal{C}} \subset \mathcal{C}$ such that
+        $|\tilde{\mathcal{C}}| = \rho |\mathcal{C}|$.
+        Alternatively, $\mathcal{A}$ may directly modify model weights in the
+        base checkpoint (model-poisoning variant).
+
+  \item \textbf{Knowledge:} $\mathcal{A}$ has no access to the victim's
+        fine-tuning pipeline, reward model, or preference dataset used in
+        RLHF. This reflects a realistic open-weight model distribution
+        scenario (e.g., models distributed via public repositories).
+
+  \item \textbf{Goal:} Maximize attack success rate
+        $\mathrm{ASR}(\theta, M_{\mathrm{ft}})$ — the probability that
+        the fine-tuned model $M_{\mathrm{ft}}$ produces adversarially
+        targeted output $\hat{y}_{\mathrm{adv}}$ when presented with
+        samples containing trigger pattern $\theta$ — while maintaining
+        benign-task accuracy $\mathrm{BA}(M_{\mathrm{ft}}) \geq \delta_b$
+        on clean inputs.
+
+  \item \textbf{Stealth constraint:} The poisoned samples must be
+        semantically consistent with the surrounding corpus, i.e.,
+        $\mathrm{PPL}(\tilde{x}) \leq \mu_{\mathrm{PPL}} + 2\sigma_{\mathrm{PPL}}$,
+        where $\mu$ and $\sigma$ denote the mean and standard deviation of
+        perplexity over the clean corpus.
+\end{itemize}
+
+The defender $\mathcal{D}$ controls the fine-tuning pipeline (SFT and/or
+RLHF) and has full access to $M_{\mathrm{ft}}$ weights and activations,
+but has no prior knowledge of the existence, type, or trigger of the
+backdoor. This asymmetry motivates the need for a post-hoc resilience
+metric that operates without trigger knowledge.
+
+% -----------------------------------------------------------
+\subsection{Formal Problem Statement}
+\label{sec:problem}
+
+Let $M_N$ denote a transformer-based language model with $N$ parameters,
+pre-trained on corpus $\mathcal{C}$ with token-level entropy
+$H(\mathcal{C}) = -\sum_{t} p(t) \log p(t)$, where $t$ ranges over
+the vocabulary $\mathcal{V}$.
+
+Following safety fine-tuning on a clean dataset $\mathcal{D}_{\mathrm{ft}}$
+of size $D_{\mathrm{ft}}$, the resulting model is denoted
+$M_N^{\mathrm{ft}}$.
+Define the \emph{backdoor persistence function}:
+%
+\begin{equation}
+  \Psi(N, \rho, D_{\mathrm{ft}}) \;=\;
+    \mathrm{ASR}\!\left(\theta,\, M_N^{\mathrm{ft}}\right),
+  \label{eq:persistence}
+\end{equation}
+%
+where $\theta$ is the implanted trigger and $\rho$ is the poison rate.
+The central empirical claim of this work is that $\Psi$ is
+\emph{non-decreasing} in $N$ for fixed $(\rho, D_{\mathrm{ft}}, \theta)$:
+
+\begin{equation}
+  N_1 \leq N_2 \;\Longrightarrow\; \Psi(N_1, \rho, D_{\mathrm{ft}})
+  \;\leq\; \Psi(N_2, \rho, D_{\mathrm{ft}}).
+  \label{eq:monotone}
+\end{equation}
+
+Equation~\eqref{eq:monotone} captures the intuition that larger models,
+possessing greater memorization capacity~\cite{carlini2022quantifying},
+retain trigger-response associations more robustly across fine-tuning
+perturbations. We formalize and empirically validate this claim in
+Sections~\ref{sec:framework} and~\ref{sec:eval}.
+
+% -----------------------------------------------------------
+\subsection{The Cyber Resilience Scaling Coefficient}
+\label{sec:crsc}
+
+Measuring $\Psi$ directly requires knowledge of $\theta$, which is
+unavailable to $\mathcal{D}$.
+We therefore introduce a proxy metric that is computable without trigger
+knowledge, based on two observable quantities: (1)~hidden-state drift
+across fine-tuning and (2)~loss entropy change on a held-out evaluation set.
+
+\begin{definition}[Hidden-State Frobenius Drift]
+\label{def:drift}
+Let $\mathbf{h}^{(l)}(x; M)$ denote the hidden-state tensor at layer $l$
+for input $x$ under model $M$, and let $\mathcal{T}$ be a probe set of
+$|\mathcal{T}|$ samples drawn from $\mathcal{D}_{\mathrm{ft}}$.
+The \emph{hidden-state Frobenius drift} is:
+%
+\begin{equation}
+  \Delta_{\mathrm{hidden}}(M_N, M_N^{\mathrm{ft}})
+  \;=\;
+  \frac{1}{|L|}\sum_{l \in L}
+  \frac{
+    \left\|\,\mathbf{H}^{(l)}(M_N^{\mathrm{ft}}) -
+             \mathbf{H}^{(l)}(M_N)\,\right\|_F
+  }{
+    \left\|\,\mathbf{H}^{(l)}(M_N)\,\right\|_F + \varepsilon
+  },
+  \label{eq:delta_hidden}
+\end{equation}
+%
+where $\mathbf{H}^{(l)}(M) = [\mathbf{h}^{(l)}(x_1; M), \ldots,
+\mathbf{h}^{(l)}(x_{|\mathcal{T}|}; M)]$ is the stacked hidden-state
+matrix over $\mathcal{T}$, $\|\cdot\|_F$ is the Frobenius norm, and
+$\varepsilon > 0$ is a numerical stabilizer.
+\end{definition}
+
+$\Delta_{\mathrm{hidden}}$ quantifies how much fine-tuning displaces the
+model's internal representations: a low value indicates that the
+fine-tuning made only superficial changes, leaving the backdoor-encoding
+subspace largely intact.
+
+\begin{definition}[Loss Entropy Change]
+\label{def:loss_entropy}
+Let $\mathcal{L}(M, x) = -\log p_M(y \mid x)$ denote the cross-entropy
+loss of model $M$ on sample $x$.
+Given an evaluation set $\mathcal{T}$, the \emph{loss entropy} of $M$ is:
+%
+\begin{equation}
+  \mathcal{H}(M, \mathcal{T})
+  \;=\;
+  -\sum_{x \in \mathcal{T}}
+    \hat{p}(x)\,\log\,\hat{p}(x),
+  \quad
+  \hat{p}(x) = \frac{e^{-\mathcal{L}(M,x)}}{\sum_{x'} e^{-\mathcal{L}(M,x')}}.
+  \label{eq:loss_entropy}
+\end{equation}
+%
+The \emph{loss entropy change} across fine-tuning is:
+%
+\begin{equation}
+  \Delta\mathcal{H}(M_N, M_N^{\mathrm{ft}}, \mathcal{T})
+  \;=\;
+  \mathcal{H}(M_N^{\mathrm{ft}}, \mathcal{T}) -
+  \mathcal{H}(M_N, \mathcal{T}).
+  \label{eq:delta_entropy}
+\end{equation}
+\end{definition}
+
+$\Delta\mathcal{H} \approx 0$ after fine-tuning on $\mathcal{T}$
+indicates that the model's loss distribution did not reorganize
+significantly, which we show correlates with backdoor persistence.
+
+We now introduce the central metric of this paper.
+
+\begin{definition}[Cyber Resilience Scaling Coefficient]
+\label{def:crsc}
+Given base model $M_N$, fine-tuned model $M_N^{\mathrm{ft}}$,
+probe set $\mathcal{T}$, and scalar weights
+$\alpha, \beta \geq 0$ with $\alpha + \beta = 1$, the
+\emph{Cyber Resilience Scaling Coefficient} is:
+%
+\begin{equation}
+  \boxed{
+  \mathrm{CRSC}(M_N, M_N^{\mathrm{ft}}, \mathcal{T})
+  \;=\;
+  \alpha \cdot \bigl(1 - \Delta_{\mathrm{hidden}}\bigr)
+  \;+\;
+  \beta \cdot \Phi\!\left(-\Delta\mathcal{H}\right)
+  }
+  \label{eq:crsc}
+\end{equation}
+%
+where $\Phi(\cdot)$ is the standard normal CDF used as a
+smooth squashing function, mapping $\Delta\mathcal{H}$ to $[0,1]$
+with CRSC$\,\in [0,1]$.
+\end{definition}
+
+\begin{remark}
+CRSC approaches 1 when: (a) hidden-state drift is minimal
+($\Delta_{\mathrm{hidden}} \to 0$, so the first term $\to \alpha$) and
+(b) loss entropy did not increase after fine-tuning
+($\Delta\mathcal{H} \leq 0$, so $\Phi(-\Delta\mathcal{H}) \to 1$).
+Both conditions are consistent with a model whose backdoor-encoding
+weights survived fine-tuning. Conversely, CRSC $\to 0$ when fine-tuning
+substantially reorganizes both the representation space and the loss
+distribution.
+\end{remark}
+
+% -----------------------------------------------------------
+\subsection{Theoretical Properties of CRSC}
+\label{sec:theory}
+
+\begin{proposition}[Monotonicity in $N$]
+\label{prop:monotone}
+Under the assumption that transformer hidden-state stability grows with
+model capacity (formalized as $\frac{\partial}{\partial N}
+\Delta_{\mathrm{hidden}} \leq 0$, consistent with the Lipschitz
+stability results of~\cite{baldi2019capacity}), CRSC is
+non-decreasing in $N$ for fixed $(\rho, D_{\mathrm{ft}}, \theta)$:
+%
+\begin{equation}
+  N_1 \leq N_2 \;\Longrightarrow\;
+  \mathrm{CRSC}(M_{N_1}, M_{N_1}^{\mathrm{ft}}, \mathcal{T})
+  \;\leq\;
+  \mathrm{CRSC}(M_{N_2}, M_{N_2}^{\mathrm{ft}}, \mathcal{T}).
+  \label{eq:crsc_monotone}
+\end{equation}
+\end{proposition}
+
+\begin{proof}[Proof Sketch]
+The hidden-state drift $\Delta_{\mathrm{hidden}}$ measures how much
+fine-tuning perturbs the representation space.
+Larger models have higher parameter redundancy~\cite{frankle2019lottery},
+which allows fine-tuning gradients to be absorbed into non-backdoor
+subspaces, leaving backdoor-encoding neurons largely unchanged.
+Formally, if we model the fine-tuning update as $\delta W \sim \mathcal{N}(0,
+\sigma_{\mathrm{ft}}^2 I)$ and the backdoor encoding as residing in a
+rank-$r$ subspace $\mathcal{B}$ of the weight space, then for
+$N \gg r / \sigma_{\mathrm{ft}}^2$, the probability of $\delta W$
+projecting onto $\mathcal{B}$ diminishes, preserving the backdoor.
+The formal bound follows from random matrix theory applied to gradient
+flow in overparameterized networks~\cite{du2019gradient}.
+\end{proof}
+
+\begin{proposition}[CRSC as a Proxy for $\Psi$]
+\label{prop:proxy}
+Let $\tau \in [0,1]$ be a threshold.
+If $\mathrm{CRSC}(M_N, M_N^{\mathrm{ft}}, \mathcal{T}) \geq \tau$,
+then $\mathrm{ASR}(\theta, M_N^{\mathrm{ft}}) \geq 1 - \delta$
+with probability at least $1 - \exp(-c|\mathcal{T}|)$, where
+$c$ and $\delta$ are constants that depend on $(\alpha, \beta, \tau)$
+and the trigger type.
+\end{proposition}
+
+The proof of Proposition~\ref{prop:proxy} follows from the
+concentration of measure for neural network representations and is
+given in the supplementary material.
+Section~\ref{sec:eval} empirically calibrates $\tau = 0.62$ on our
+evaluation suite.
+
+% -----------------------------------------------------------
+\subsection{Scope and Assumptions}
+\label{sec:scope}
+
+We make the following explicit assumptions, which bound the validity
+of our claims:
+
+\begin{enumerate}
+  \item \textbf{White-box access:} CRSC requires access to model weights
+        and hidden states. Black-box API-only access precludes direct
+        CRSC computation; Section~\ref{sec:discussion} discusses
+        approximate variants.
+
+  \item \textbf{Transformer architecture:} We focus on decoder-only
+        transformers. Extension to encoder-decoder architectures is
+        left for future work.
+
+  \item \textbf{Static triggers:} We evaluate fixed trigger patterns
+        (token-level, sentence-level, style-level). Dynamic or
+        adaptive triggers~\cite{qi2021turn} are out of scope.
+
+  \item \textbf{Single-backdoor scenario:} We assume a single trigger
+        $\theta$ per model. Multi-backdoor models are a known but
+        orthogonal problem.
+\end{enumerate}

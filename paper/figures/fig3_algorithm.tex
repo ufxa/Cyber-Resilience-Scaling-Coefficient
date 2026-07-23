@@ -1,0 +1,118 @@
+% =============================================================
+%  FIGURA 3 — Algorithm 1: CRSC Computation
+%  Requer pacotes: algorithm2e, amsmath, xcolor, mdframed
+% =============================================================
+
+\begin{figure*}[t]
+\centering
+\begin{minipage}{0.92\linewidth}
+
+% ---- destaque da métrica novel ----
+\newcommand{\CRSCbox}[1]{%
+  \colorbox{yellow!25}{\strut #1}%
+}
+
+\begin{algorithm}[H]
+\DontPrintSemicolon
+\SetAlgoLined
+\SetKwInOut{Input}{Input}
+\SetKwInOut{Output}{Output}
+\SetKwComment{Comment}{$\triangleright$\,}{}
+
+\caption{CRSC Computation}
+\label{alg:crsc}
+
+\Input{Base model $M_N$;\; fine-tuned model $M_N^{\mathrm{ft}}$;\;
+       probe set $\mathcal{T}$;\; layer set $L$;\;
+       weights $\alpha,\beta \geq 0$,\; $\alpha+\beta=1$;\;
+       stabilizer $\varepsilon > 0$}
+\Output{\CRSCbox{$\mathrm{CRSC}(M_N, M_N^{\mathrm{ft}}, \mathcal{T}) \in [0,1]$}}
+
+\BlankLine
+\tcp{\textbf{Phase 1 — Hidden-state Frobenius Drift} (Eq.~\ref{eq:delta_hidden})}
+
+$\mathtt{drift\_sum} \leftarrow 0$\;
+
+\ForEach{layer $l \in L$}{
+  $\mathbf{H}_{\mathrm{base}}^{(l)} \leftarrow
+    \bigl[\mathbf{h}^{(l)}(x; M_N)\bigr]_{x \in \mathcal{T}}$
+  \Comment*[r]{extract hidden states — base model}
+
+  $\mathbf{H}_{\mathrm{ft}}^{(l)} \leftarrow
+    \bigl[\mathbf{h}^{(l)}(x; M_N^{\mathrm{ft}})\bigr]_{x \in \mathcal{T}}$
+  \Comment*[r]{extract hidden states — fine-tuned model}
+
+  $\mathtt{drift\_sum} \mathrel{+}=
+    \dfrac{\bigl\|\mathbf{H}_{\mathrm{ft}}^{(l)} -
+                  \mathbf{H}_{\mathrm{base}}^{(l)}\bigr\|_F}
+          {\bigl\|\mathbf{H}_{\mathrm{base}}^{(l)}\bigr\|_F + \varepsilon}$\;
+}
+
+$\Delta_{\mathrm{hidden}} \leftarrow \mathtt{drift\_sum} \;/\; |L|$\;
+
+\BlankLine
+\tcp{\textbf{Phase 2 — Loss Entropy Change} (Eqs.~\ref{eq:loss_entropy},~\ref{eq:delta_entropy})}
+
+\ForEach{$x \in \mathcal{T}$}{
+  $\ell_{\mathrm{base}}(x) \leftarrow \mathcal{L}(M_N,\, x)$\;
+  $\ell_{\mathrm{ft}}(x)   \leftarrow \mathcal{L}(M_N^{\mathrm{ft}},\, x)$\;
+}
+
+$\mathcal{H}_{\mathrm{base}} \leftarrow
+  \mathrm{ShannonEntropy}\!\left(
+    \mathrm{Softmax}\!\bigl(-[\ell_{\mathrm{base}}(x)]_{x \in \mathcal{T}}\bigr)
+  \right)$\;
+
+$\mathcal{H}_{\mathrm{ft}} \leftarrow
+  \mathrm{ShannonEntropy}\!\left(
+    \mathrm{Softmax}\!\bigl(-[\ell_{\mathrm{ft}}(x)]_{x \in \mathcal{T}}\bigr)
+  \right)$\;
+
+$\Delta\mathcal{H} \leftarrow \mathcal{H}_{\mathrm{ft}} - \mathcal{H}_{\mathrm{base}}$\;
+
+\BlankLine
+\tcp{\textbf{Phase 3 — CRSC Aggregation} (Eq.~\ref{eq:crsc})}
+
+\CRSCbox{$\mathrm{CRSC} \;\leftarrow\;
+  \alpha \cdot (1 - \Delta_{\mathrm{hidden}})
+  \;+\;
+  \beta \cdot \Phi\!\left(-\Delta\mathcal{H}\right)$}\;
+
+\BlankLine
+\Return $\mathrm{CRSC}$
+
+\BlankLine
+\hrule
+\vspace{2pt}
+{\footnotesize
+\textbf{Complexity:}
+$\mathcal{O}(|L| \cdot |\mathcal{T}| \cdot d^2)$\;
+where $d$ is the hidden dimension.
+For $M_N$ with $|L|{=}32$, $|\mathcal{T}|{=}500$, $d{=}4096$
+(LLaMA-2-7B), CRSC runs in $\approx 4.2$\,min on a single A100 GPU.
+Sub-linear in $N$ when hidden states are sampled uniformly
+($|\mathcal{T}| \ll |\mathcal{C}|$).\;
+\textbf{Memory:}
+$\mathcal{O}(|L| \cdot |\mathcal{T}| \cdot d)$ for storing both
+$\mathbf{H}_{\mathrm{base}}^{(l)}$ and $\mathbf{H}_{\mathrm{ft}}^{(l)}$.
+}
+\end{algorithm}
+
+\end{minipage}
+
+\caption{%
+  Algorithm~1: CRSC Computation.
+  The \colorbox{yellow!25}{highlighted box} marks the novel CRSC formula
+  (Definition~\ref{def:crsc}, Eq.~\ref{eq:crsc}).
+  Phase~1 computes the normalized Frobenius drift of hidden states across
+  all layers $L$ (lower drift $\Rightarrow$ higher CRSC).
+  Phase~2 computes the Shannon entropy change of the per-sample loss
+  distribution (entropy non-increase $\Rightarrow$ higher CRSC).
+  Phase~3 combines both signals with learned weights $\alpha, \beta$.
+  Complexity is $\mathcal{O}(|L| \cdot |\mathcal{T}| \cdot d^2)$,
+  tractable via uniform sampling of $\mathcal{T}$ from the fine-tuning set.
+  \emph{Data used in Section~\ref{sec:eval} are synthetic
+  (seed\,=\,42); see Section~\ref{sec:eval} for provenance.}%
+}
+\label{fig:algorithm}
+\end{figure*}
