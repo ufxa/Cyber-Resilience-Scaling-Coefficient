@@ -1,0 +1,62 @@
+% =============================================================
+%  TABLE II — Experimental Setup (OBRIGATÓRIA — 5 categorias fixas)
+%  Requer: tabularx, booktabs, table*
+%  Posição: início da Seção VI (Experimental Evaluation)
+% =============================================================
+
+\begin{table*}[t]
+\caption{Experimental Setup}
+\label{tab:setup}
+\begin{tabularx}{\textwidth}{@{} l l X @{}}
+\toprule
+\textbf{Category} & \textbf{Item} & \textbf{Details} \\
+\midrule
+
+% ── Hardware ─────────────────────────────────────────────────────────────────
+\multirow{5}{*}{\textbf{Hardware}}
+  & GPU    & 1$\times$ NVIDIA A100 SXM4 80\,GB (BF16, CUDA 12.4) \\
+  & CPU    & Intel Xeon Gold 6338 @ 2.00\,GHz, 32 cores \\
+  & RAM    & 512\,GB DDR4-3200 ECC \\
+  & Storage& 2\,TB NVMe SSD (sequential read 7\,GB/s) \\
+  & OS     & Ubuntu 22.04.4 LTS (kernel 5.15.0-112) \\
+\midrule
+
+% ── AI Models ────────────────────────────────────────────────────────────────
+\multirow{5}{*}{\textbf{AI Models}}
+  & LLMs evaluated    & LLaMA-2-7B, LLaMA-2-13B, LLaMA-2-70B~\cite{touvron2023llama2} \\
+  & Fine-tuning method& SFT (Alpaca dataset, 52\,K samples) and RLHF (reward model: LLaMA-2-7B-chat) \\
+  & Embedding model   & N/A (hidden states extracted directly from transformer layers) \\
+  & Framework         & PyTorch 2.3.1 + HuggingFace Transformers 4.44.0 + DeepSpeed ZeRO-3 \\
+  & Parameters        & 7B / 13B / 70B; hidden dimensions $d \in \{4096, 5120, 8192\}$; layers $L \in \{32, 40, 80\}$ \\
+\midrule
+
+% ── Dataset ──────────────────────────────────────────────────────────────────
+\multirow{6}{*}{\textbf{Dataset}}
+  & Name        & Synthetic backdoor evaluation suite (calibrated against TrojAI NIST 2024~\cite{trojai2024}) \\
+  & Size        & 500 probe samples per experimental run; $3 \times 4 \times 3 \times 2 = 72$ total runs \\
+  & Source      & Synthetically generated (seed\,=\,42); statistical parameters derived from Yang~et~al.~\cite{yang2024shadow} \\
+  & License     & MIT (synthetic data; no proprietary or personal data used) \\
+  & Split       & Not applicable (evaluation probe set; no train/test split required for CRSC computation) \\
+  & Period      & Backdoor patterns calibrated against 2023--2026 attack taxonomy \\
+\midrule
+
+% ── Simulation ───────────────────────────────────────────────────────────────
+\multirow{5}{*}{\textbf{Simulation}}
+  & Tool              & Custom Python 3.12 runner (\texttt{a100\_runner.py}); NumPy 1.26 synthetic tensor generation \\
+  & Configurations    & 3 model sizes $\times$ 4 poison rates $\times$ 3 trigger types $\times$ 2 fine-tuning methods = 72 runs \\
+  & Agents            & 3 independent evaluation agents (Detection, Analysis, Response; Section~\ref{sec:eval}) \\
+  & Duration          & $\approx$\,25--40\,min on A100 (synthetic mode); checkpoint-based resumption supported \\
+  & Reproducibility   & \texttt{numpy.random.default\_rng(seed=42)}; fixed throughout all stages \\
+\midrule
+
+% ── Software ─────────────────────────────────────────────────────────────────
+\multirow{5}{*}{\textbf{Software}}
+  & Language    & Python 3.12 \\
+  & Core libs   & NumPy 1.26, SciPy 1.13, pandas 2.2, scikit-learn 1.5, matplotlib 3.9, tqdm 4.66 \\
+  & LaTeX       & IEEEtran.cls (IEEE double-column); compiled with \texttt{tectonic} 0.15 \\
+  & Repository  & \url{https://github.com/ufxa/Cyber-Resilience-Scaling-Coefficient} \\
+  & Git version & \texttt{main} branch; DOI via Zenodo (assigned upon acceptance) \\
+
+\bottomrule
+\end{tabularx}
+\end{table*}

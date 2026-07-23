@@ -1,0 +1,92 @@
+% ─────────────────────────────────────────────────────────────────────────────
+% Section V — Security Analysis and Compliance
+% ─────────────────────────────────────────────────────────────────────────────
+
+\section{Security Analysis and Compliance}
+\label{sec:security}
+
+\subsection{MITRE ATLAS Mapping}
+
+MITRE ATLAS~\cite{mitre_atlas2024} documents adversarial ML attack techniques against
+AI systems. Table~\ref{tab:atlas} maps backdoor persistence to the ATLAS taxonomy
+and identifies where CRSC provides detection coverage.
+
+\begin{table}[t]
+\centering
+\caption{CRSC coverage across MITRE ATLAS adversarial ML techniques.}
+\label{tab:atlas}
+\begin{tabular}{lll}
+\toprule
+\textbf{ATLAS ID} & \textbf{Technique} & \textbf{CRSC Role} \\
+\midrule
+AML.T0018 & Backdoor ML Model      & Primary detection target \\
+AML.T0019 & Publish Poisoned Model & Post-publish assessment \\
+AML.T0020 & Poison Training Data   & Pre-training audit \\
+AML.T0031 & Evade ML Model         & Trigger-agnostic detection \\
+AML.T0043 & Craft Adversarial Data & Probe set construction \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+CRSC addresses AML.T0018 (Backdoor ML Model) as a \emph{detection countermeasure}
+and AML.T0019 (Publish Poisoned Model) as a \emph{pre-deployment gate}. By
+quantifying persistence after fine-tuning, CRSC enables organizations to
+operationalize ATLAS detection in their LLM deployment pipelines.
+
+\subsection{NIST AI Risk Management Framework}
+
+The NIST AI RMF~\cite{nist_ai_rmf2023} organizes AI risk across four functions:
+GOVERN, MAP, MEASURE, and MANAGE. CRSC contributes primarily to the MEASURE
+function:
+
+\begin{itemize}[leftmargin=*]
+  \item \textbf{GOVERN 1.2:} CRSC thresholds ($\tau = 0.62$) provide
+  quantitative criteria for model acceptance policies.
+
+  \item \textbf{MAP 2.3:} The three-agent pipeline systematically maps
+  backdoor risks across model scale, trigger types, and fine-tuning methods.
+
+  \item \textbf{MEASURE 2.5:} CRSC scores provide a standardized measurement
+  of adversarial robustness compatible with organizational risk registers.
+
+  \item \textbf{MANAGE 4.1:} HIGH-risk classifications ($\text{CRSC} \geq 0.62$)
+  trigger specific mitigation workflows, including layer-targeted fine-tuning
+  and model quarantine.
+\end{itemize}
+
+\subsection{Threat-Specific Mitigations}
+
+For each risk level, we recommend the following mitigations:
+
+\textbf{HIGH risk (CRSC $\geq 0.62$):}
+(i) Apply neuron activation analysis~\cite{chen2018detecting} to identify
+backdoor-associated neurons; (ii) perform targeted layer re-initialization
+on layers with $\delta^{(l)}_\text{hidden} > 0.7$; (iii) apply STRIP
+detection~\cite{gao2019strip} as a runtime filter.
+
+\textbf{MODERATE risk (CRSC $\in [0.45, 0.62)$):}
+(i) Increase fine-tuning dataset diversity (reduce trigger correlation);
+(ii) apply spectral signatures detection~\cite{tran2018spectral};
+(iii) monitor ASR on held-out trigger set during deployment.
+
+\textbf{LOW risk (CRSC $< 0.45$):}
+Standard model validation procedures are sufficient. Periodic re-evaluation
+recommended when the model is re-fine-tuned.
+
+\subsection{Adversarial Validity}
+
+A critical concern for any detection metric is whether adversaries can craft
+triggers that evade it. We analyze two evasion strategies:
+
+\textbf{Hidden-state camouflage:} An adversary could optimize trigger tokens
+to minimize $\Delta_\text{hidden}$ while maintaining high ASR. This constitutes
+an adaptive attack against CRSC's first component. However, minimizing
+$\Delta_\text{hidden}$ requires the backdoor to be encoded entirely in
+output-layer logits, which is detectable via $\Delta H$ (the second component).
+
+\textbf{Entropy equalization:} An adversary could pre-scale losses to produce
+$\Delta H \approx 0$. However, this would require knowledge of the specific
+probe set $\mathcal{T}$, which is held secret by the evaluator. We formalize
+this as a security game and show that a CRSC-aware adversary must increase
+model complexity by $\Omega(\sqrt{N})$ to simultaneously evade both components,
+making evasion computationally expensive at the 70B scale.

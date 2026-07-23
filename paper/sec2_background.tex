@@ -1,0 +1,71 @@
+% ─────────────────────────────────────────────────────────────────────────────
+% Section II — Background and Related Work
+% ─────────────────────────────────────────────────────────────────────────────
+
+\section{Background and Related Work}
+\label{sec:background}
+
+\subsection{LLM Backdoor Attacks}
+
+Backdoor attacks on neural networks, introduced by Gu~et~al.~\cite{gu2017badnets},
+embed hidden triggers that cause misclassification while preserving benign accuracy.
+In language models, Chen~et~al.~\cite{chen2021badnl} extended this paradigm to
+NLP tasks, demonstrating that token-level triggers survive standard fine-tuning.
+Wallace~et~al.~\cite{wallace2021concealed} showed that backdoors survive BERT
+fine-tuning, persisting across downstream task adaptation.
+
+More recently, Yang~et~al.~\cite{yang2024watch} established that RLHF-based
+safety alignment does not reliably remove backdoors from instruction-tuned models.
+Their experiments on LLaMA-2 show that models poisoned at rates as low as 1\%
+retain attack success rates above 80\% after RLHF. Hubinger~et~al.~\cite{hubinger2024sleeper}
+introduced ``sleeper agent'' backdoors that survive chain-of-thought safety training,
+further motivating formal persistence metrics.
+
+\subsection{Scaling Laws}
+
+Kaplan~et~al.~\cite{kaplan2020scaling} established that loss scales as a power
+law in $N$ (parameter count), dataset size $D$, and compute $C$. Hoffmann~et~al.~\cite{hoffmann2022training}
+refined this via Chinchilla scaling. Crucially, these laws describe \emph{capability}
+scaling; no prior work has derived analogous laws for \emph{security} properties.
+
+Wei~et~al.~\cite{wei2022emergent} documented emergent capabilities at specific
+scale thresholds ($N \approx 10^{10}$), suggesting that security behavior may
+also exhibit phase transitions. Our monotonicity proof (Proposition~\ref{prop:monotone})
+provides a formal basis for this conjecture in the backdoor persistence context.
+
+\subsection{Post-Training Security}
+
+Bai~et~al.~\cite{bai2022constitutional} introduced Constitutional AI (CAI) as an
+alignment approach; Perez~et~al.~\cite{perez2022red} demonstrated that red-teaming
+can systematically probe LLM safety boundaries. Sharma~et~al.~\cite{sharma2023towards}
+proposed watermarking for LLM traceability, while Wan~et~al.~\cite{wan2023poisoning}
+studied instruction-tuning poisoning at large scale.
+
+\subsection{Resilience Metrics}
+
+In classical cybersecurity, resilience metrics quantify recovery after adversarial
+events~\cite{linkov2013resilience}. For ML systems, Carlini~et~al.~\cite{carlini2019evaluating}
+emphasized the importance of adaptive evaluation. The closest prior metric is the
+backdoor effectiveness score~\cite{li2022backdoor}, which measures ASR post-fine-tuning
+but does not model scale dependency. CRSC fills this gap.
+
+\subsection{Comparison with Existing Work}
+
+Table~\ref{tab:related} positions CRSC against the most relevant prior metrics.
+
+\begin{table}[t]
+\centering
+\caption{Comparison of backdoor persistence metrics.}
+\label{tab:related}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Method} & \textbf{Scale} & \textbf{Formal} & \textbf{LLM} & \textbf{RLHF} \\
+ & \textbf{Dep.} & \textbf{Proof} & \textbf{Native} & \textbf{Aware} \\
+\midrule
+BES~\cite{li2022backdoor}   & \xmark & \xmark & \cmark & \xmark \\
+TrojAI~\cite{trojai2024}    & \xmark & \xmark & \cmark & \xmark \\
+ASR-RLHF~\cite{yang2024watch} & \xmark & \xmark & \cmark & \cmark \\
+CRSC (ours)                 & \cmark & \cmark & \cmark & \cmark \\
+\bottomrule
+\end{tabular}
+\end{table}

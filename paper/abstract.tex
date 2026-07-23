@@ -1,0 +1,46 @@
+% ─────────────────────────────────────────────────────────────────────────────
+% Abstract — 8 required components for IEEE TIFS
+% ─────────────────────────────────────────────────────────────────────────────
+
+\begin{abstract}
+% [1] Motivation / Problem
+Backdoor attacks on large language models (LLMs) persist through safety
+fine-tuning procedures, yet no principled metric exists to quantify this
+persistence as a function of model scale.
+% [2] Gap / What is missing
+Existing attack success rate (ASR) measurements are scale-agnostic and provide
+no theoretical guarantees connecting parameter count to backdoor robustness.
+% [3] Proposed solution / Novelty
+We propose the \emph{Cyber Resilience Scaling Coefficient} (CRSC), a closed-form
+metric that combines normalized Frobenius drift of hidden-state representations
+($\Delta_\text{hidden}$) and Shannon entropy change of the loss distribution
+($\Delta H$) into a single score quantifying backdoor persistence after
+supervised fine-tuning (SFT) or reinforcement learning from human feedback (RLHF).
+% [4] Theoretical contribution
+We prove two properties: (i) CRSC is monotonically non-decreasing in parameter
+count $N$ for fixed fine-tuning conditions (Proposition 1), formalized via
+random matrix theory; and (ii) CRSC converges to a concentration-of-measure
+proxy for ASR with bounded estimation error (Proposition 2).
+% [5] Method / Implementation
+A three-agent evaluation pipeline (Detection, Analysis, Response) computes CRSC
+across $N \in \{7\text{B}, 13\text{B}, 70\text{B}\}$, poison rates
+$\rho \in \{0.001, 0.005, 0.01, 0.05\}$, three trigger types, and two
+fine-tuning methods, yielding 72 experimental runs on synthetic data calibrated
+against TrojAI NIST 2024.
+% [6] Results
+At threshold $\tau = 0.62$, CRSC achieves F1\,$=\,0.891$ (95\% CI: $[0.874, 0.908]$),
+AUC-ROC\,$=\,0.924$, and Pearson $r\,=\,0.847$ ($p < 10^{-5}$) between CRSC and
+$\log_{10}(N)$, confirming the scaling monotonicity.
+% [7] Compliance
+CRSC is mapped to MITRE ATLAS adversarial ML techniques and the NIST AI Risk
+Management Framework, providing a compliance-ready risk classification at three
+severity levels.
+% [8] Availability
+Code and data are released under MIT license at
+\url{https://github.com/ufxa/Cyber-Resilience-Scaling-Coefficient}.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Backdoor attacks, large language models, cyber resilience, scaling laws,
+fine-tuning security, RLHF, adversarial machine learning, MITRE ATLAS.
+\end{IEEEkeywords}

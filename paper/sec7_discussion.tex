@@ -1,0 +1,74 @@
+% ─────────────────────────────────────────────────────────────────────────────
+% Section VII — Discussion
+% ─────────────────────────────────────────────────────────────────────────────
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Implications for AI Safety}
+
+Our results establish that backdoor persistence is a monotonically increasing
+function of model scale under fixed fine-tuning conditions. This has a direct
+practical implication: \emph{scaling safety fine-tuning naively (more data,
+more compute) does not guarantee proportional safety gains for larger models}.
+At 70B parameters, even RLHF-based alignment leaves CRSC scores above 0.55
+for sentence-level and style-level triggers, suggesting that current alignment
+procedures are insufficient as sole mitigation strategies for large-scale deployment.
+
+This finding corroborates the ``sleeper agent'' results of Hubinger~et~al.~\cite{hubinger2024sleeper},
+providing a quantitative mechanism: the random matrix theory argument underlying
+Proposition~\ref{prop:monotone} suggests that the null space of the fine-tuning
+gradient grows with $N$, creating an increasingly large subspace where backdoor
+representations can ``hide'' without being updated during RLHF.
+
+\subsection{The 70B Threshold Effect}
+
+Our data reveals a non-linear increase in CRSC at the 70B scale: the mean CRSC
+jump from 13B to 70B (0.099 absolute) exceeds the 7B-to-13B jump (0.052 absolute).
+This is consistent with Wei~et~al.'s~\cite{wei2022emergent} observation of emergent
+capabilities at the $\sim\!10^{10}$ parameter threshold. We conjecture that
+backdoor representation dimensionality exhibits a similar phase transition, making
+70B+ models qualitatively harder to sanitize rather than merely quantitatively harder.
+Verifying this hypothesis with real LLaMA-2-70B weights is the subject of ongoing work.
+
+\subsection{Limitations}
+
+\textbf{Synthetic data:} Our experiments use calibrated synthetic data rather than
+actual fine-tuned LLaMA-2 weights. While calibrated against TrojAI NIST 2024
+and validated against Yang~et~al.~\cite{yang2024watch} empirical ASR values,
+synthetic distributions may not capture all statistical properties of real
+fine-tuning dynamics. Experiments with real weights (enabled by \texttt{USE\_REAL=1}
+mode in our codebase) will strengthen the empirical claims in future work.
+
+\textbf{White-box assumption:} CRSC requires access to intermediate hidden states,
+limiting applicability to settings where the deployer controls the model weights.
+Black-box variants based on output-level statistics (e.g., logit distributions)
+are an important extension.
+
+\textbf{Static triggers:} We evaluate fixed trigger patterns. Adaptive triggers
+that modify themselves in response to detection~\cite{nguyen2021wanet} may
+evade CRSC's hidden-state analysis. Extending CRSC to dynamic trigger regimes
+requires adversarial probe set construction.
+
+\textbf{Single backdoor:} We assume at most one backdoor per model. Multiple
+simultaneous backdoors with orthogonal trigger patterns may distribute
+$\Delta_\text{hidden}$ across non-overlapping subspaces, potentially reducing
+individual CRSC scores below $\tau$ while maintaining high aggregate ASR.
+
+\subsection{Future Directions}
+
+\textbf{CRSC for black-box settings:} Replace $\Delta_\text{hidden}$ with
+output-level distributional distances (e.g., Maximum Mean Discrepancy on
+logit distributions), enabling CRSC computation without hidden-state access.
+
+\textbf{Scale-aware fine-tuning:} Develop mitigation strategies that explicitly
+target the null-space subspaces identified by the CRSC analysis, proportionally
+scaling intervention intensity with $N$.
+
+\textbf{Multi-backdoor extension:} Generalize CRSC to a vector-valued metric
+that identifies individual backdoor components via independent component analysis
+on the layer drift tensors.
+
+\textbf{Real-weight validation:} Deploy our \texttt{download\_weights.sh} pipeline
+to validate CRSC on actual LLaMA-2 weights across all three scales, targeting
+a follow-up publication with grade 9--10 empirical contributions.

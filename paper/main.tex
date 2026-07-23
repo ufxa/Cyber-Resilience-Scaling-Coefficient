@@ -1,0 +1,82 @@
+% ─────────────────────────────────────────────────────────────────────────────
+% main.tex — CRSC Paper
+% "Scaling Laws for Cyber Resilience: Modeling the Persistence of Backdoors
+%  in Post-trained Large Language Models"
+%
+% Target: IEEE Transactions on Information Forensics and Security (TIFS)
+%         Impact Factor 6.8 | 12 pages | IEEE double-column
+%
+% Author: Allan Douglas Costa (UFRA / LICA / SEC365)
+% Date  : 2026
+% ─────────────────────────────────────────────────────────────────────────────
+
+\documentclass[journal,compsoc]{IEEEtran}
+
+% ── Packages ──────────────────────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{enumitem}
+\usepackage{algorithm2e}
+\usepackage{microtype}
+\usepackage{cite}
+\usepackage{pifont}   % \cmark, \xmark
+
+% ── Theorem environments ──────────────────────────────────────────────────────
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{assumption}{Assumption}
+
+% ── Custom commands ───────────────────────────────────────────────────────────
+\newcommand{\CRSC}{\text{CRSC}}
+\newcommand{\Dh}{\Delta_{\text{hidden}}}
+\newcommand{\DH}{\Delta H}
+\newcommand{\norm}[1]{\left\|#1\right\|}
+\newcommand{\cmark}{\ding{51}}   % check mark
+\newcommand{\xmark}{\ding{55}}   % x mark
+
+% ─────────────────────────────────────────────────────────────────────────────
+\begin{document}
+
+\title{Scaling Laws for Cyber Resilience: Modeling the Persistence of Backdoors
+       in Post-trained Large Language Models}
+
+\author{Allan~Douglas~Costa,~\IEEEmembership{Member,~IEEE,}
+        and~Research~Group~LICA/SEC365%
+\thanks{A. D. Costa is with the Laboratório de Inteligência e Cibersegurança
+Aplicada (LICA), Universidade Federal Rural da Amazônia (UFRA), Belém, PA,
+Brazil, and SEC365 Research Group. E-mail: \texttt{dev@sec365.com.br}.
+Manuscript received 2026. This work was supported in part by CNPq.
+Code: \url{https://github.com/ufxa/Cyber-Resilience-Scaling-Coefficient}}}
+
+\markboth{IEEE Transactions on Information Forensics and Security,~Vol.~xx,
+No.~x, 2026}{Costa: Scaling Laws for Cyber Resilience}
+
+\maketitle
+
+% ── Abstract ──────────────────────────────────────────────────────────────────
+\input{abstract}
+
+% ── Body ──────────────────────────────────────────────────────────────────────
+\input{sec1_introduction}
+\input{sec2_background}
+\input{sec3_threat_model}
+\input{sec4_framework}
+\input{sec5_security}
+\input{sec6_experiments}
+\input{sec7_discussion}
+\input{sec8_conclusion}
+
+% ── References ────────────────────────────────────────────────────────────────
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

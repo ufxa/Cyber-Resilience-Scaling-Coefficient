@@ -1,0 +1,39 @@
+% ─────────────────────────────────────────────────────────────────────────────
+% Section VIII — Conclusion
+% ─────────────────────────────────────────────────────────────────────────────
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+We introduced the Cyber Resilience Scaling Coefficient (CRSC), the first formal
+metric that quantifies backdoor persistence in post-trained LLMs as a function
+of model scale. CRSC combines normalized Frobenius drift of hidden-state
+representations ($\Delta_\text{hidden}$) with Shannon entropy change of the
+loss distribution ($\Delta H$) into a single score in $[0,1]$, with threshold
+$\tau = 0.62$ providing a calibrated risk classification.
+
+We proved two key theoretical properties: CRSC is monotonically non-decreasing
+in parameter count $N$ for fixed fine-tuning conditions (Proposition~\ref{prop:monotone}),
+and it converges to a concentration-of-measure proxy for attack success rate
+(Proposition~\ref{prop:proxy}). These results provide a formal basis for the
+empirical observation that larger models are harder to sanitize.
+
+Experimental validation across 72 runs on synthetic data calibrated against
+TrojAI NIST 2024 demonstrated F1 $= 0.891$, AUC-ROC $= 0.924$, and Pearson
+$r = 0.847$ between CRSC and $\log_{10}(N)$. The three-agent evaluation pipeline
+(Detection, Analysis, Response) provides a deployable red-team toolkit for
+practitioners, mapped to MITRE ATLAS and NIST AI RMF compliance requirements.
+
+CRSC establishes a new research direction: \emph{security scaling laws}, analogous
+to capability scaling laws but quantifying adversarial robustness rather than
+benign performance. As AI systems are deployed at ever-larger scales in
+safety-critical applications, formal metrics for quantifying the security
+implications of scale become essential infrastructure for responsible AI deployment.
+The codebase, including the \texttt{USE\_REAL=1} pipeline for real LLaMA-2
+weight experiments, is released at \url{https://github.com/ufxa/Cyber-Resilience-Scaling-Coefficient}.
+
+\section*{Acknowledgments}
+
+The authors thank the LICA (Laboratório de Inteligência e Cibersegurança Aplicada)
+research group at UFRA for computing resources and the SEC365 team for operational
+support. This work was supported in part by the CNPq research infrastructure program.

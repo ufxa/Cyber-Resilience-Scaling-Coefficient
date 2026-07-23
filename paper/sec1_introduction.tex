@@ -1,0 +1,61 @@
+% ─────────────────────────────────────────────────────────────────────────────
+% Section I — Introduction
+% Paper: Scaling Laws for Cyber Resilience: Modeling the Persistence of
+%        Backdoors in Post-trained Large Language Models
+% ─────────────────────────────────────────────────────────────────────────────
+
+\section{Introduction}
+\label{sec:intro}
+
+Large language models (LLMs) have demonstrated remarkable capabilities across
+security-sensitive domains, including penetration testing assistance~\cite{happe2023got},
+vulnerability analysis~\cite{pearce2023examining}, and autonomous cyberdefense~\cite{kang2024exploiting}.
+This proliferation, however, introduces a critical attack surface: adversaries
+may embed \emph{backdoors}---hidden behavioral triggers that cause targeted
+model outputs when activated---during the supply chain of model training.
+Unlike classical software vulnerabilities, LLM backdoors survive post-training
+alignment procedures (supervised fine-tuning, SFT, and reinforcement learning from
+human feedback, RLHF), creating a persistent threat even after safety hardening.
+
+A fundamental open question concerns the relationship between \emph{model scale}
+and \emph{backdoor persistence}: do larger models resist fine-tuning-based
+backdoor removal more than smaller ones? Empirical evidence from prior
+work~\cite{yang2024watch,chen2021badnl,wang2024rlhf_backdoor} suggests a positive
+correlation between parameter count and attack success rate (ASR) after RLHF,
+but no formal metric captures this relationship in a principled way suitable
+for risk quantification or regulatory compliance.
+
+\textbf{Contributions.} This paper makes four concrete contributions:
+
+\begin{enumerate}
+  \item We propose the \emph{Cyber Resilience Scaling Coefficient} (CRSC), a
+  closed-form metric that quantifies backdoor persistence after fine-tuning as a
+  function of model scale $N$, poison rate $\rho$, and fine-tuning dataset $D_\text{ft}$
+  (Section~\ref{sec:threat}).
+
+  \item We prove two theoretical properties: (i) monotonicity of CRSC in $N$
+  for fixed $(\rho, D_\text{ft})$ --- larger models are provably harder to
+  sanitize (Proposition~\ref{prop:monotone}); and (ii) CRSC is a concentration-of-measure
+  proxy for ASR with bounded estimation error (Proposition~\ref{prop:proxy}).
+
+  \item We design a three-agent evaluation pipeline (Detection, Analysis, Response)
+  and validate CRSC on synthetic data calibrated against the TrojAI NIST 2024
+  benchmark~\cite{trojai2024}, achieving F1 $= 0.891$ and AUC-ROC $= 0.924$ at
+  $\tau = 0.62$ (Section~\ref{sec:experiments}).
+
+  \item We map CRSC to the MITRE ATLAS adversarial ML framework and the
+  NIST AI Risk Management Framework (AI RMF), providing actionable mitigation
+  guidance for practitioners (Section~\ref{sec:security}).
+\end{enumerate}
+
+\textbf{Scope and limitations.} Our analysis assumes white-box access to
+hidden states (a common red-team setting~\cite{perez2022red}), static trigger
+patterns, and transformer architectures. Adaptive triggers and black-box
+settings remain open challenges; we discuss them in Section~\ref{sec:discussion}.
+
+\textbf{Organization.} Section~\ref{sec:background} reviews related work and
+establishes notation. Section~\ref{sec:threat} formalizes the threat model and
+derives CRSC. Section~\ref{sec:framework} presents the algorithmic pipeline.
+Section~\ref{sec:security} addresses security compliance. Section~\ref{sec:experiments}
+reports experimental results. Sections~\ref{sec:discussion} and~\ref{sec:conclusion}
+discuss implications and conclude.
