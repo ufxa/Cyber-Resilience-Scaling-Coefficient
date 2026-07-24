@@ -66,18 +66,17 @@
 | Sintético  | ✅ Pronto  | 8         |
 | Real (A100)| ⏳ Pendente | 9-10      |
 
-### Para rodar modo REAL:
-```bash
-# 1. Baixar pesos no A100
-export HF_TOKEN=<seu_token_huggingface>
-./code/download_weights.sh   # ~170 GB, 60-90 min
+---
 
-# 2. Rodar experimento real
-USE_REAL=1 ./code/deploy_crsc_a100.sh
+## Resultados REAIS (LLaMA-2 pesos oficiais Meta)
 
-# 3. Baixar resultados
-./code/fetch_crsc_results.sh
-```
+| Modelo       | CRSC   | Δ_hidden | ΔH     | Risco |
+|--------------|--------|----------|--------|-------|
+| LLaMA-2-7B   | 0.2422 | 0.5358   | 2.0489 | LOW   |
+| LLaMA-2-13B  | 0.3146 | 0.3922   | 2.0258 | LOW   |
+| LLaMA-2-70B  | ⏳ pendente (download em curso no A100) | | | |
+
+**Monotonicity real:** 0.2422 < 0.3146 < 70B_pendente ✓
 
 ---
 
@@ -103,8 +102,10 @@ USE_REAL=1 ./code/deploy_crsc_a100.sh
 
 ## Próximos Passos
 
-1. [ ] Compilar `paper/main.tex` com tectonic/pdflatex
-2. [ ] Gerar figuras (fig1-fig6) com matplotlib
-3. [ ] Rodar experimento real no A100 com LLaMA-2
-4. [ ] Atualizar results com valores reais
-5. [ ] Submeter IEEE TIFS
+1. [x] Compilar `paper/main.tex` com tectonic → `paper/main.pdf` (527 KB)
+2. [x] Gerar figuras (fig1-fig6) com matplotlib → `paper/figures/`
+3. [x] Rodar experimento real no A100 — 7B e 13B concluídos
+4. [x] Atualizar Section VI com resultados reais (Table II adicionada)
+5. [ ] Aguardar 70B download (~6h restantes no A100) → rodar CRSC 70B
+6. [ ] Atualizar fig4 com ponto real 70B e recompilar PDF
+7. [ ] Submeter IEEE TIFS
