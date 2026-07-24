@@ -1,5 +1,5 @@
 % ─────────────────────────────────────────────────────────────────────────────
-% Section VI — Experimental Evaluation
+% Section VI --- Experimental Evaluation
 % ─────────────────────────────────────────────────────────────────────────────
 
 \section{Experimental Evaluation}
@@ -63,7 +63,7 @@ Section~\ref{sec:agent2}) because production RLHF training applies
 substantially larger fine-tuning budgets ($\rho \ll 0.05$) than our
 synthetic conditions, driving $\Delta_{\text{hidden}}$ higher.
 
-\subsection{Agent 1 — Detection Results}
+\subsection{Agent 1 --- Detection Results}
 
 Table~\ref{tab:agent1} reports detection performance at $\tau = 0.62$.
 
@@ -90,7 +90,7 @@ $\mu = 0.554$) and token-level ($\gamma_T$, $\mu = 0.501$). This aligns with
 prior findings that distributed stylistic triggers are harder to remove via
 gradient-based fine-tuning~\cite{qi2021hidden}.
 
-\subsection{Agent 2 — Analysis Results}
+\subsection{Agent 2 --- Analysis Results}
 \label{sec:agent2}
 
 Figure~\ref{fig:crsc_vs_n} plots mean CRSC against $\log_{10}(N)$ for all
@@ -128,7 +128,7 @@ $p = 3.2 \times 10^{-4}$, confirming that RLHF produces significantly lower
 CRSC scores than SFT at the same scale --- RLHF is a more effective (though
 still insufficient) mitigation.
 
-\subsection{Agent 3 — Response Results}
+\subsection{Agent 3 --- Response Results}
 
 Figure~\ref{fig:asr_crsc} shows the correlation between CRSC and empirical ASR
 across all 72 runs.

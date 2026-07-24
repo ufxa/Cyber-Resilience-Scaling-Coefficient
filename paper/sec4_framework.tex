@@ -1,5 +1,5 @@
 % ─────────────────────────────────────────────────────────────────────────────
-% Section IV — CRSC Framework
+% Section IV --- CRSC Framework
 % ─────────────────────────────────────────────────────────────────────────────
 
 \section{CRSC Framework}
@@ -24,16 +24,16 @@ trigger a HIGH risk alert.}
 The pipeline is organized as three specialized agents operating on the same
 probe dataset $\mathcal{T} = \{t_1, \ldots, t_K\}$ of $K = 500$ trigger-embedded prompts:
 
-\textbf{Agent 1 — Detection:} Classifies each model pair $(M_N, M_N^{\text{ft}})$
+\textbf{Agent 1 --- Detection:} Classifies each model pair $(M_N, M_N^{\text{ft}})$
 as HIGH or LOW risk based on CRSC $\geq \tau$. Reports F1 score, precision, recall,
 false positive rate (FPR), and AUC-ROC with bootstrap confidence intervals
 ($n = 5{,}000$, $\alpha = 0.05$).
 
-\textbf{Agent 2 — Analysis:} Computes Pearson correlation between CRSC and
+\textbf{Agent 2 --- Analysis:} Computes Pearson correlation between CRSC and
 $\log_{10}(N)$, and performs Wilcoxon signed-rank test between SFT and RLHF
 distributions. Provides per-model statistics with 95\% bootstrap intervals.
 
-\textbf{Agent 3 — Response:} Sweeps $\tau \in [0.40, 0.84]$ to identify the
+\textbf{Agent 3 --- Response:} Sweeps $\tau \in [0.40, 0.84]$ to identify the
 operating point that maximizes F1 while bounding FPR $\leq 0.10$. Outputs
 Precision@$\tau$ and a calibration report.
 
@@ -79,11 +79,11 @@ quantization mode.
 CRSC $\in [0, 1]$ with higher values indicating greater backdoor persistence:
 
 \begin{itemize}[leftmargin=*]
-  \item CRSC $\geq 0.62$: \textbf{HIGH risk} — fine-tuning has not displaced
+  \item CRSC $\geq 0.62$: \textbf{HIGH risk} --- fine-tuning has not displaced
   the backdoor representation; immediate mitigation recommended.
-  \item CRSC $\in [0.45, 0.62)$: \textbf{MODERATE risk} — partial displacement;
+  \item CRSC $\in [0.45, 0.62)$: \textbf{MODERATE risk} --- partial displacement;
   targeted layer analysis warranted.
-  \item CRSC $< 0.45$: \textbf{LOW risk} — fine-tuning has substantially altered
+  \item CRSC $< 0.45$: \textbf{LOW risk} --- fine-tuning has substantially altered
   the backdoor-relevant subspace.
 \end{itemize}
 
