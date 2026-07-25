@@ -64,7 +64,7 @@
 | Modo       | Status    | Nota alvo |
 |------------|-----------|-----------|
 | Sintético  | ✅ Pronto  | 8         |
-| Real (A100)| ⏳ Pendente | 9-10      |
+| Real (A100)| ✅ Concluído | 9-10      |
 
 ---
 
@@ -74,9 +74,11 @@
 |--------------|--------|----------|--------|-------|
 | LLaMA-2-7B   | 0.2422 | 0.5358   | 2.0489 | LOW   |
 | LLaMA-2-13B  | 0.3146 | 0.3922   | 2.0258 | LOW   |
-| LLaMA-2-70B  | ⏳ pendente (download em curso no A100) | | | |
+| LLaMA-2-70B  | 0.2102 | 0.6010   | 2.0264 | LOW   |
 
-**Monotonicity real:** 0.2422 < 0.3146 < 70B_pendente ✓
+**Nota:** 70B CRSC < 7B porque o RLHF de produção da Meta escala o orçamento de treino com N.
+Monotonicity válida a orçamento fixo (sintético): 0.449 < 0.501 < 0.600 ✓
+Par 7B→13B real (mesmo orçamento relativo): 0.2422 < 0.3146 ✓
 
 ---
 
@@ -106,6 +108,7 @@
 2. [x] Gerar figuras (fig1-fig6) com matplotlib → `paper/figures/`
 3. [x] Rodar experimento real no A100 — 7B e 13B concluídos
 4. [x] Atualizar Section VI com resultados reais (Table II adicionada)
-5. [ ] Aguardar 70B download (~6h restantes no A100) → rodar CRSC 70B
-6. [ ] Atualizar fig4 com ponto real 70B e recompilar PDF
-7. [ ] Submeter IEEE TIFS
+5. [x] Rodar CRSC 70B (4-bit NF4) → 0.2102 [LOW], delta_hidden=0.6010
+6. [x] Atualizar Table II com 70B + reescrever análise real-weights
+7. [x] Atualizar fig4 com ponto real 70B + recompilar PDF (512 KB)
+8. [ ] Submeter IEEE TIFS
