@@ -13,6 +13,17 @@ We evaluate CRSC across 72 experimental runs covering all combinations of
 $N \in \{7\text{B}, 13\text{B}, 70\text{B}\}$, $\rho \in \{0.001, 0.005, 0.01, 0.05\}$,
 $\gamma \in \{\gamma_T, \gamma_S, \gamma_Y\}$, and
 $\phi \in \{\text{SFT}, \text{RLHF}\}$.
+The three trigger types are:
+$\gamma_T$ (\emph{token-level}): a rare out-of-vocabulary token inserted at a
+fixed position;
+$\gamma_S$ (\emph{sentence-level}): a fixed adversarial sentence appended to
+the input;
+$\gamma_Y$ (\emph{style-level}): a distributed syntactic style pattern
+(passive voice + formal register) applied to the entire input~\cite{qi2021hidden}.
+The fine-tuning method $\phi = \text{RLHF}$ uses PPO-based reinforcement
+learning from human feedback~\cite{christiano2017deep,ouyang2022instructgpt};
+$\phi = \text{SFT}$ uses standard supervised fine-tuning on the poisoned
+dataset $D_{\text{ft}}$.
 Each run uses the same probe set $\mathcal{T}$ with $K = 500$ samples and
 \texttt{numpy.default\_rng(42)} for reproducibility.
 
