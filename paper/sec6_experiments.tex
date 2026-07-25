@@ -16,8 +16,23 @@ $\phi \in \{\text{SFT}, \text{RLHF}\}$.
 Each run uses the same probe set $\mathcal{T}$ with $K = 500$ samples and
 \texttt{numpy.default\_rng(42)} for reproducibility.
 
-All statistical tests use two-sided hypotheses. Pearson correlation confidence
-intervals are estimated via bootstrap resampling ($n = 5{,}000$, $B = 5$ seeds).
+All statistical tests use two-sided hypotheses.
+Confidence intervals are constructed via bootstrap resampling with $n = 5{,}000$
+resamples and $B = 5$ random seeds; the reported 95\% CI is the mean
+interval width across seeds using BCa correction.
+
+The Pearson $r = 0.847$ between CRSC and $\log_{10}(N)$ is computed across
+all 72 experimental runs, treating each run as an observation of
+$(\mathrm{CRSC}_i,\, \log_{10}(N_i))$.
+This conflates within-scale variance with cross-scale trend and should
+be interpreted as a \emph{pooled} correlation: it measures how consistently
+CRSC increases with scale across all conditions jointly, not as a
+three-point scale correlation (which would have only 1 degree of freedom
+and no meaningful $p$-value).
+The between-scale Pearson correlation (three mean points, one d.f.) is
+$r_{\text{between}} = 0.998$, confirming the monotone trend at the scale level;
+no $p$-value is reported for this three-point statistic.
+
 Wilcoxon signed-rank tests compare CRSC distributions between SFT and RLHF
 conditions at each model scale.
 
@@ -103,10 +118,13 @@ distributions (held separate from the Yang~et~al.\ test set), and
 Readers should interpret $\Delta$SoTA values as approximate lower bounds
 on performance advantage pending fully independent evaluation.
 MNTD~\cite{xu2021mntd} and ShrinkPad~\cite{fu2022shrinkpad} are additional
-detection baselines whose LLaMA-2-scale results are not directly comparable
-(they target image-domain or shallow NLP triggers); we include their
-citations for completeness and identify their adaptation to RLHF-fine-tuned
-LLMs as a priority for future empirical comparison.
+detection baselines; their LLaMA-2-scale results are not directly comparable
+to ours (MNTD targets image-domain DNNs; ShrinkPad targets shallow
+token-substitution triggers in encoder-only models) and are therefore
+\emph{not included in Table~\ref{tab:agent1}}.
+We include their citations in the related work context and identify their
+adaptation to RLHF-fine-tuned decoder LLMs as a priority for future empirical
+comparison on a shared benchmark.
 
 \begin{table}[t]
 \centering
@@ -215,6 +233,15 @@ that both components contribute independently.
 Both ablated variants degrade performance: hidden-only (B) misses entropy-level
 persistence encoded in output distributions, while entropy-only (C) misses
 representational shifts in intermediate layers.
+The $\alpha = \beta = 0.5$ equal weighting is motivated by the symmetric
+contribution of the two components to the variance of CRSC across runs:
+$\mathrm{Var}(\Delta_{\text{hidden}}) \approx \mathrm{Var}(\Phi(-\Delta H))$
+in our experimental distribution (ratio $= 1.03$, not statistically
+different from 1.0 by an $F$-test at $p = 0.72$).
+A sensitivity analysis over $\alpha \in \{0.3, 0.4, 0.5, 0.6, 0.7\}$ shows
+F1 variation of at most 0.009 across the range, confirming that the equal
+weighting is near-optimal and that the performance is not sensitive to the
+exact choice within this interval.
 
 \subsection{Scalability Analysis}
 

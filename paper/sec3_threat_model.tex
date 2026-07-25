@@ -168,24 +168,45 @@ $(\rho, D_{\text{ft}}, \gamma)$:
 We bound the probability that fine-tuning displaces the backdoor subspace.
 By Assumption~\ref{asm:generic}, the $r$ gradient directions in
 $\mathbb{R}^{d_N}$ act as independent random unit vectors.
-By a volumetric argument on the Grassmannian manifold
-(Vershynin~\cite{vershynin2018high}, Ch.~5), a random unit vector in
-$\mathbb{R}^{d_N}$ lies within a fixed $k$-dimensional subspace
-$\mathcal{S}_b$ with probability $k/d_N$; a union bound over $r$ gradient
-directions gives:
+Let $\varepsilon > 0$ be a fixed angular threshold below which a gradient
+direction does not meaningfully perturb the backdoor subspace.
+By the spherical symmetry of the uniform measure on $\mathbb{S}^{d_N-1}$,
+for a uniformly random unit vector $\mathbf{g}$ the expected squared projection
+onto any fixed $k$-dimensional subspace $\mathcal{S}_b$ satisfies
+$\mathbb{E}[\|\mathbf{P}_{\mathcal{S}_b}\mathbf{g}\|^2] = k/d_N$
+(Vershynin~\cite{vershynin2018high}, Ch.~5.2).
+Applying Markov's inequality:
+\begin{equation}
+  \Pr\!\bigl[\|\mathbf{P}_{\mathcal{S}_b}\mathbf{g}\|^2 > \varepsilon^2\bigr]
+  \;\leq\; \frac{k}{\varepsilon^2\, d_N}.
+\end{equation}
+A union bound over $r = \Theta(|D_{\text{ft}}|)$ independent gradient directions then gives:
 \begin{align}
-  \Pr\bigl[G \cap \mathcal{S}_b \neq \{0\}\bigr]
-  &\;\leq\; \frac{k \cdot r}{d_N}
-  \;=\; \frac{\Theta(N^{\alpha_b})\cdot\Theta(|D_{\text{ft}}|)}{\Theta(N^\beta)}
+  \Pr\bigl[\text{any gradient interferes with } \mathcal{S}_b\bigr]
+  &\;\leq\; \frac{k \cdot r}{\varepsilon^2\, d_N}
+  \;=\; \frac{\Theta(N^{\alpha_b})\cdot\Theta(|D_{\text{ft}}|)}
+             {\varepsilon^2\,\Theta(N^\beta)}
   \notag\\
-  &\;=\; \Theta\!\left(\frac{|D_{\text{ft}}|}{N^{\beta-\alpha_b}}\right)
+  &\;=\; \Theta\!\left(\frac{|D_{\text{ft}}|}{\varepsilon^2\, N^{\beta-\alpha_b}}\right)
 \end{align}
-where $\beta \approx 0.3$ reflects the empirically observed sub-linear growth
-of hidden dimension with parameter count in the LLaMA-2 family
-($d_N \in \{4096, 5120, 8192\}$ for $N \in \{7\text{B}, 13\text{B}, 70\text{B}\}$,
-yielding $d_N = \Theta(N^{0.3})$).
-Since $|D_{\text{ft}}|$ is fixed and $\beta - \alpha_b > 0$, this probability
-decreases as $N^{-(\beta-\alpha_b)} \to 0$.  Consequently,
+Here $\beta$ is the empirically estimated growth exponent of the hidden
+dimension: $d_N = \Theta(N^\beta)$.
+For the LLaMA-2 family, $d_N \in \{4096,5120,8192\}$ at
+$N \in \{7\text{B},13\text{B},70\text{B}\}$; the 7B$\to$70B ratio gives
+$\beta_{70/7} = \log(2)/\log(10) \approx 0.30$ and the 7B$\to$13B ratio gives
+$\beta_{13/7} \approx 0.38$.
+Since the power-law exponent is not perfectly stable over three points, we
+treat $\beta$ as a parameter satisfying $\beta \in [0.28, 0.40]$;
+monotonicity holds for \emph{any} $\beta > \alpha_b$.
+The backdoor subspace exponent $\alpha_b$ governs how the rank of
+$\mathcal{S}_b$ scales with $N$: empirically, backdoor representations
+for token-level and style-level triggers are low-dimensional (rank $\leq 10$,
+consistent with $\alpha_b \approx 0$, well below any plausible $\beta$), as
+evidenced by the small $\Delta_{\text{hidden}}$ required to achieve high CRSC
+in our synthetic experiments.
+Since $\varepsilon$ is fixed, $|D_{\text{ft}}|$ is fixed, and
+$\beta - \alpha_b > 0$, the interference probability decreases as
+$N^{-(\beta-\alpha_b)} \to 0$.  Consequently,
 $\mathbb{E}[\Delta_{\text{hidden}}]$ decreases with $N$, so
 $\mathbb{E}[(1-\Delta_{\text{hidden}})^+]$ is non-decreasing.
 An analogous argument for the entropy component follows from the
@@ -193,14 +214,25 @@ concentration of bounded loss distributions~\cite{boucheron2013concentration}.
 Combined, $\mathbb{E}[\mathrm{CRSC}]$ is non-decreasing in $N$.
 \end{IEEEproof}
 
-\begin{remark}
-When $|D_{\text{ft}}| = \Theta(N^\beta)$ (budget scales proportionally with
-the hidden dimension), the collision probability stays constant and
-monotonicity does not hold.  When $|D_{\text{ft}}| = \Theta(N)$ (budget
-scales linearly with parameter count, as in Meta's production RLHF), the
-probability decreases even faster, driving CRSC below $\tau$.
-Both cases explain the 70B production result in Section~\ref{sec:real_validation}.
-\end{remark}
+\begin{corollary}[Fine-tuning budget threshold]
+\label{cor:budget_threshold}
+Let $\gamma_{\text{ft}}$ denote the scaling exponent of the fine-tuning
+dataset: $|D_{\text{ft}}| = \Theta(N^{\gamma_{\text{ft}}})$.
+\begin{enumerate}[(i)]
+  \item If $\gamma_{\text{ft}} < \beta - \alpha_b$ (fixed or sub-linear budget
+        relative to hidden dimension growth), the interference probability
+        decreases with $N$, and Proposition~\ref{prop:monotone} holds.
+  \item If $\gamma_{\text{ft}} = \beta - \alpha_b$, the interference probability
+        is $\Theta(1)$ and the monotonicity direction is indeterminate.
+  \item If $\gamma_{\text{ft}} > \beta - \alpha_b$ (super-linear budget, as in
+        Meta's production RLHF where $\gamma_{\text{ft}} = 1 > \beta$), the
+        interference probability \emph{increases} with $N$, the fine-tuning
+        effectively sanitizes larger models more thoroughly, and we predict
+        $\mathrm{CRSC} \ll \tau$---consistent with Table~\ref{tab:real_crsc}.
+\end{enumerate}
+The CRSC monotonicity claim in the paper's thesis applies exclusively to
+case~(i), the fixed-budget threat scenario.
+\end{corollary}
 
 \begin{proposition}[CRSC as ASR Proxy]
 \label{prop:proxy}

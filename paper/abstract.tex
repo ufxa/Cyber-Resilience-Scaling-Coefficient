@@ -28,9 +28,11 @@ $\rho \in \{0.001, 0.005, 0.01, 0.05\}$, three trigger types, and two
 fine-tuning methods, yielding 72 experimental runs on synthetic data calibrated
 against TrojAI NIST 2024.
 % [6] Results
-At threshold $\tau = 0.62$, CRSC achieves F1\,$=\,0.891$ (95\% CI: $[0.874, 0.908]$),
-AUC-ROC\,$=\,0.924$, and Pearson $r\,=\,0.847$ ($p < 10^{-5}$) between CRSC and
-$\log_{10}(N)$, confirming the scaling monotonicity.
+At threshold $\tau = 0.62$, CRSC achieves F1\,$=\,0.891$ (95\% CI: $[0.874, 0.908]$,
+on data calibrated against Yang~et~al.~\cite{yang2024watch}; see Section~VI),
+AUC-ROC\,$=\,0.924$, and Pearson $r\,=\,0.847$ (72 runs across all scale-and-condition
+combinations; see Section~VI for degrees-of-freedom discussion), confirming
+the scaling monotonicity.
 % [7] Compliance
 CRSC is mapped to MITRE ATLAS adversarial ML techniques and the NIST AI Risk
 Management Framework, providing a compliance-ready risk classification at three
