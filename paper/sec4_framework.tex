@@ -10,14 +10,7 @@ pipeline. Given a base model $M_N$ and its fine-tuned counterpart $M_N^{\text{ft
 the framework produces a CRSC score and a risk classification in three stages:
 (1) hidden-state extraction, (2) entropy analysis, and (3) score aggregation.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{figures/fig1_overview}
-\caption{CRSC evaluation pipeline. Three stages extract $\Delta_\text{hidden}$,
-compute $\Delta H$, and aggregate into the CRSC score. Scores above $\tau = 0.62$
-trigger a HIGH risk alert.}
-\label{fig:overview}
-\end{figure}
+\input{fig1_pipeline}
 
 \subsection{Three-Agent Architecture}
 
@@ -95,11 +88,4 @@ the TrojAI NIST 2024 validation set~\cite{trojai2024}.
 Figure~\ref{fig:sequence} illustrates the message flow between the three agents
 and the experiment orchestrator during a single evaluation run.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{figures/fig2_sequence}
-\caption{Sequence diagram for the three-agent CRSC evaluation pipeline.
-Agents operate sequentially on shared hidden-state tensors extracted once
-per model pair.}
-\label{fig:sequence}
-\end{figure}
+\input{fig2_sequence}

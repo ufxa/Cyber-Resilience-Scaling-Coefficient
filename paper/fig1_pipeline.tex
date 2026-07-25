@@ -1,0 +1,146 @@
+% ─────────────────────────────────────────────────────────────────────────────
+% Fig 1 — CRSC Evaluation Framework (TikZ)
+% Compile standalone: pdflatex fig1_pipeline.tex
+% Include in main: \input{fig1_pipeline}  (remove \documentclass block)
+% ─────────────────────────────────────────────────────────────────────────────
+% \documentclass[tikz,border=4pt]{standalone}
+% \usepackage{tikz,amsmath}
+% \usetikzlibrary{arrows.meta,fit,positioning,backgrounds,shadows.blur}
+% \begin{document}
+
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\small\sffamily,
+  % ── node styles ─────────────────────────────────────────────────────────
+  base/.style   = {draw, rounded corners=4pt, minimum width=2.4cm,
+                   minimum height=1.1cm, align=center, line width=0.7pt},
+  model/.style  = {base, fill=blue!18,    draw=blue!55!black},
+  threat/.style = {base, fill=red!15,     draw=red!55!black},
+  ftune/.style  = {base, fill=teal!16,    draw=teal!50!black},
+  store/.style  = {base, fill=gray!13,    draw=gray!50},
+  engine/.style = {base, fill=cyan!14,    draw=cyan!50!black, line width=0.9pt},
+  metric/.style = {base, fill=purple!12,  draw=purple!45!black,
+                   minimum width=2.6cm, minimum height=0.95cm},
+  score/.style  = {base, fill=orange!15,  draw=orange!55!black,
+                   minimum width=3.0cm,  minimum height=1.15cm, line width=0.9pt},
+  agdet/.style  = {base, fill=red!10,     draw=red!45!black},
+  agan/.style   = {base, fill=violet!13,  draw=violet!45!black},
+  agres/.style  = {base, fill=green!13,   draw=green!45!black},
+  report/.style = {base, fill=yellow!18,  draw=orange!50!black,
+                   minimum width=3.4cm},
+  % ── arrow styles ────────────────────────────────────────────────────────
+  main/.style   = {-{Stealth[length=5pt]}, line width=1.1pt, color=blue!60!black},
+  sec/.style    = {-{Stealth[length=4pt]}, line width=0.8pt, color=purple!55!black},
+  dasharrow/.style = {-{Stealth[length=4pt]}, dashed, line width=0.75pt, color=gray!60},
+  % ── label style ─────────────────────────────────────────────────────────
+  lbl/.style    = {font=\scriptsize\sffamily, fill=white, inner sep=1.5pt},
+]
+
+% ── Row 0: Main pipeline (horizontal) ────────────────────────────────────────
+\node[model]  (llm)    at (0,0)
+  {\textbf{Pre-trained LLM}\\$\theta_{\text{base}}$\\$N\in\{7\text{B},13\text{B},70\text{B}\}$};
+
+\node[threat] (inject) [right=1.2cm of llm]
+  {\textbf{Backdoor Injection}\\trigger $\gamma$, rate $\rho$\\{\scriptsize BadNets/SOS/style}};
+
+\node[ftune]  (ftune)  [right=1.2cm of inject]
+  {\textbf{Post-training}\\SFT / RLHF\\$\theta_{\text{base}}\!\to\!\theta_{\text{ft}}$};
+
+\node[store]  (probe)  [right=1.2cm of ftune]
+  {\textbf{Probe Set} $\mathcal{T}$\\$K\!=\!500$ sentences\\seed\,=\,42};
+
+\node[engine] (engine) [right=1.2cm of probe]
+  {\textbf{CRSC Engine}\\hidden-state\\extraction};
+
+% ── Row 1: Metric components (below engine) ──────────────────────────────────
+\node[metric] (dhid)   [below=1.2cm of engine, xshift=-1.55cm]
+  {$\boldsymbol{\Delta_{\text{hidden}}}$\\[-1pt]
+   {\scriptsize $\|h_{\text{base}}-h_{\text{ft}}\|_F / \|h_{\text{base}}\|_F$}};
+
+\node[metric] (dh)     [right=0.8cm of dhid]
+  {$\boldsymbol{\Delta H}$\\[-1pt]
+   {\scriptsize $H(\ell_{\text{ft}})-H(\ell_{\text{base}})$}};
+
+% ── Row 2: CRSC score ─────────────────────────────────────────────────────────
+\node[score]  (score)  [below=1.1cm of dhid, xshift=1.55cm]
+  {\textbf{CRSC Score}\\[1pt]
+   $\alpha(1\!-\!\Delta_{\text{hid}})+\beta\,\Phi(-\Delta H)$\\[1pt]
+   {\scriptsize $\alpha\!=\!\beta\!=\!0.5$\quad threshold $\tau\!=\!0.62$}};
+
+% ── Row 3: Three agents ───────────────────────────────────────────────────────
+\node[agdet] (ag1) [below=1.2cm of score, xshift=-2.7cm]
+  {\textbf{Agent 1}\\Detection\\{\scriptsize F1\,=\,0.891\;AUC\,=\,0.924}};
+
+\node[agan]  (ag2) [below=1.2cm of score]
+  {\textbf{Agent 2}\\Analysis\\{\scriptsize $r\!=\!0.847$, $p\!<\!0.001$}};
+
+\node[agres] (ag3) [below=1.2cm of score, xshift=2.7cm]
+  {\textbf{Agent 3}\\Response\\{\scriptsize Prec@$\tau\!=\!0.903$}};
+
+% ── Row 4: Risk report ────────────────────────────────────────────────────────
+\node[report] (risk) [below=1.1cm of ag2]
+  {\textbf{Risk Report}\\LOW\,/\,MEDIUM\,/\,HIGH\\{\scriptsize MITRE ATLAS\,·\,NIST AI RMF}};
+
+% ── Main flow arrows ──────────────────────────────────────────────────────────
+\draw[main] (llm)    -- node[lbl,above]{inject $\gamma,\rho$}   (inject);
+\draw[main] (inject) -- node[lbl,above]{poison $\theta$}        (ftune);
+\draw[main] (ftune)  -- node[lbl,above]{$\theta_{\text{ft}}$}   (probe);
+\draw[main] (probe)  -- node[lbl,above]{$h_{\text{base}},h_{\text{ft}}$} (engine);
+
+% ── Engine → metrics ──────────────────────────────────────────────────────────
+\draw[sec] (engine.south) -- ++(0,-0.45) -| (dhid.north);
+\draw[sec] (engine.south) -- ++(0,-0.45) -| (dh.north);
+
+% ── Metrics → score ───────────────────────────────────────────────────────────
+\draw[sec] (dhid.south) -- ++(0,-0.35) -| (score.north);
+\draw[sec] (dh.south)   -- ++(0,-0.35) -| (score.north);
+
+% ── Score → agents ────────────────────────────────────────────────────────────
+\draw[sec]  (score.south) -- ++(0,-0.4) -| (ag1.north)
+            node[pos=0.18,lbl,above]{\scriptsize CRSC$\geq\tau$?};
+\draw[sec]  (score.south) -- (ag2.north);
+\draw[dasharrow] (score.south) -- ++(0,-0.4) -| (ag3.north);
+
+% ── Agents → risk ────────────────────────────────────────────────────────────
+\draw[sec]  (ag1.south) -- ++(0,-0.35) -| (risk.north)
+            node[pos=0.15,lbl,below]{\scriptsize alert};
+\draw[sec]  (ag2.south) -- (risk.north);
+\draw[dasharrow] (ag3.south) -- ++(0,-0.35) -| (risk.north)
+            node[pos=0.15,lbl,below]{\scriptsize action};
+
+% ── Boundary boxes ────────────────────────────────────────────────────────────
+\begin{scope}[on background layer]
+  % Adversarial surface
+  \node[draw=red!45!black, dashed, rounded corners=5pt, line width=0.75pt,
+        fill=red!4, inner sep=7pt,
+        fit=(inject),
+        label={[font=\scriptsize\sffamily\color{red!55!black},above]
+               Adversarial Input Surface}] {};
+  % Metric layer
+  \node[draw=purple!45!black, dashed, rounded corners=5pt, line width=0.75pt,
+        fill=purple!4, inner sep=8pt,
+        fit=(dhid)(dh)(score),
+        label={[font=\scriptsize\sffamily\color{purple!55!black},above left]
+               CRSC Metric Layer}] {};
+  % Agent layer
+  \node[draw=green!40!black, dashed, rounded corners=5pt, line width=0.75pt,
+        fill=green!3, inner sep=7pt,
+        fit=(ag1)(ag2)(ag3),
+        label={[font=\scriptsize\sffamily\color{green!45!black},above]
+               Three-Agent Evaluation Layer}] {};
+\end{scope}
+
+\end{tikzpicture}%
+}% end resizebox
+\caption{CRSC evaluation framework.
+The adversary injects a backdoor trigger $\gamma$ at rate $\rho$ and fine-tunes
+the model ($\theta_{\text{base}}\!\to\!\theta_{\text{ft}}$ via SFT or RLHF).
+The CRSC Engine extracts hidden states over a fixed probe set $\mathcal{T}$,
+computes $\Delta_{\text{hidden}}$ (representational drift) and $\Delta H$ (entropy shift),
+and aggregates them into the CRSC score.
+Three specialized agents perform detection, trend analysis, and response;
+their outputs are consolidated into a structured risk report.}
+\label{fig:overview}
+\end{figure*}
