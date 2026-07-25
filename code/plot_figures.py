@@ -182,25 +182,37 @@ def plot_fig4():
 def plot_fig5():
     fig, ax = plt.subplots(figsize=(5.5, 4.0))
 
+    # ── 1. Faixas de fundo (espelho da fig4) ─────────────────────────────────
+    ax.axvspan(CRSC_TAU, 0.72, color="#FEF3C7", alpha=0.45, zorder=0, lw=0)
+    ax.axvspan(0.36, CRSC_TAU, color="#EFF6FF", alpha=0.35, zorder=0, lw=0)
+
+    # ── 2. Pontos coloridos por modelo ────────────────────────────────────────
     for lbl in ["7B", "13B", "70B"]:
         crsc_vals, asr_vals = _asr_data[lbl]
         ax.scatter(crsc_vals, asr_vals,
-                   s=22, color=_colors_f5[lbl], marker=_markers_f5[lbl],
-                   alpha=0.82, linewidths=0, zorder=3)
+                   s=26, color=_colors_f5[lbl], marker=_markers_f5[lbl],
+                   alpha=0.88, linewidths=0, zorder=3)
 
+    # ── 3. Linha de fit colorida (índigo) ─────────────────────────────────────
     all_crsc = np.concatenate([_asr_data[l][0] for l in ["7B","13B","70B"]])
     all_asr  = np.concatenate([_asr_data[l][1] for l in ["7B","13B","70B"]])
     m, b = np.polyfit(all_crsc, all_asr, 1)
     x_fit = np.linspace(all_crsc.min() - 0.01, all_crsc.max() + 0.01, 200)
-    ax.plot(x_fit, m * x_fit + b, color=CTAU, lw=1.4, ls="--", zorder=2)
+    ax.plot(x_fit, m * x_fit + b, color=CTRND, lw=1.8, ls="--", zorder=2)
 
-    ax.axvline(CRSC_TAU, color=CTAU, lw=0.8, ls=":")
-    ax.text(CRSC_TAU + 0.003, 0.255, "τ=0.62",
+    # ── 4. Linha τ = 0.62 ────────────────────────────────────────────────────
+    ax.axvline(CRSC_TAU, color=CTAU, lw=0.9, ls=":", zorder=3)
+    ax.text(CRSC_TAU + 0.003, 0.257, "τ = 0.62",
             va="bottom", ha="left", fontsize=7, color=CTAU)
 
+    # ── 5. Anotação Pearson r ─────────────────────────────────────────────────
     ax.text(0.03, 0.95, "Pearson r = 0.881",
             transform=ax.transAxes, fontsize=8.5, va="top",
             bbox=dict(boxstyle="round,pad=0.3", fc="white", ec=LGRAY, lw=0.8))
+
+    # ── 6. Nota de rodapé ─────────────────────────────────────────────────────
+    ax.text(0.01, 0.02, "Shaded: CRSC ≥ τ (high-risk zone)",
+            transform=ax.transAxes, fontsize=6, color="#92400E", va="bottom")
 
     ax.set_xlabel("CRSC Score", fontsize=9)
     ax.set_ylabel("Attack Success Rate (ASR)", fontsize=9)
@@ -209,27 +221,28 @@ def plot_fig5():
     ax.tick_params(labelsize=8)
 
     legend_handles = [
-        mlines.Line2D([], [], marker="o", color=C7B,  ms=5, lw=0, label="7B"),
-        mlines.Line2D([], [], marker="^", color=C13B, ms=5, lw=0, label="13B"),
-        mlines.Line2D([], [], marker="s", color=C70B, ms=5, lw=0, label="70B"),
-        mlines.Line2D([], [], ls="--",   color=CTAU,  lw=1.4,     label="Linear fit"),
+        mlines.Line2D([], [], marker="o", color=C7B,   ms=5, lw=0, label="7B"),
+        mlines.Line2D([], [], marker="^", color=C13B,  ms=5, lw=0, label="13B"),
+        mlines.Line2D([], [], marker="s", color=C70B,  ms=5, lw=0, label="70B"),
+        mlines.Line2D([], [], ls="--",   color=CTRND,  lw=1.6,     label="Linear fit"),
+        mlines.Line2D([], [], ls=":",    color=CTAU,   lw=0.9,     label="τ = 0.62"),
     ]
     fig.legend(
         handles=legend_handles,
         loc="upper center",
         bbox_to_anchor=(0.5, 1.0),
-        ncol=4,
-        fontsize=6.8,
+        ncol=5,
+        fontsize=6.5,
         frameon=True,
         edgecolor=LGRAY,
         fancybox=False,
-        handlelength=1.4,
-        handletextpad=0.35,
-        columnspacing=0.7,
-        borderpad=0.4,
+        handlelength=1.3,
+        handletextpad=0.3,
+        columnspacing=0.6,
+        borderpad=0.45,
         labelcolor="#1E293B",
     )
-    fig.tight_layout(rect=[0, 0, 1, 0.86])
+    fig.tight_layout(rect=[0, 0, 1, 0.83])
 
     out = OUT / "fig5_asr_crsc.png"
     fig.savefig(out, dpi=200, bbox_inches="tight", facecolor="white")
