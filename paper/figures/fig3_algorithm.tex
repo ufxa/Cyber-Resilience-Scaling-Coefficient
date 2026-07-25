@@ -1,0 +1,51 @@
+% ── Algorithm 1: CRSC Computation ─────────────────────────────────────────────
+\begin{algorithm}[t]
+\DontPrintSemicolon
+\SetAlgoLined
+\small
+\caption{CRSC Computation}
+\label{alg:crsc}
+
+\KwIn{Base model $M_N^{\text{bd}}$, fine-tuned model $M_N^{\text{ft}}$,
+      probe set $\mathcal{T} = \{t_1,\ldots,t_K\}$,
+      weights $\alpha,\beta$ ($\alpha{+}\beta{=}1$), threshold $\tau$}
+\KwOut{$\mathrm{CRSC} \in [0,1]$, risk label $\hat{b}$}
+
+\BlankLine
+\tcp{Stage 1 — Hidden-state extraction}
+\For{$k \leftarrow 1$ \KwTo $K$}{
+  $\mathbf{h}_k^{\text{base}} \leftarrow \textsc{MeanPool}\!\left(M_N^{\text{bd}}(t_k),\,\text{last layer}\right)$\;
+  $\mathbf{h}_k^{\text{ft}}   \leftarrow \textsc{MeanPool}\!\left(M_N^{\text{ft}}(t_k),\,\text{last layer}\right)$\;
+}
+$\mathbf{H}_{\text{base}} \leftarrow [\mathbf{h}_1^{\text{base}};\ldots;\mathbf{h}_K^{\text{base}}] \in \mathbb{R}^{K\times d}$\;
+$\mathbf{H}_{\text{ft}}   \leftarrow [\mathbf{h}_1^{\text{ft}};\ldots;\mathbf{h}_K^{\text{ft}}]   \in \mathbb{R}^{K\times d}$\;
+
+\BlankLine
+\tcp{Stage 2 — Representation drift ($O(K{\cdot}d)$ per layer)}
+$\Delta_{\text{hidden}} \leftarrow
+  \dfrac{\|\mathbf{H}_{\text{base}} - \mathbf{H}_{\text{ft}}\|_F}
+        {\|\mathbf{H}_{\text{base}}\|_F}$\;
+
+\BlankLine
+\tcp{Stage 3 — Entropy shift}
+\For{$k \leftarrow 1$ \KwTo $K$}{
+  $\ell_k^{\text{base}} \leftarrow \textsc{CrossEntropy}(M_N^{\text{bd}},\, t_k)$\;
+  $\ell_k^{\text{ft}}   \leftarrow \textsc{CrossEntropy}(M_N^{\text{ft}},\, t_k)$\;
+}
+$\Delta H \leftarrow H(\ell^{\text{ft}}) - H(\ell^{\text{base}})$ \tcp*{Shannon entropy}
+
+\BlankLine
+\tcp{Stage 4 — Score aggregation}
+$\mathrm{CRSC} \leftarrow
+  \alpha\cdot\max(1 - \Delta_{\text{hidden}},\,0)
+  + \beta\cdot\Phi(-\Delta H)$\;
+
+\BlankLine
+\tcp{Stage 5 — Risk classification}
+\eIf{$\mathrm{CRSC} \geq \tau$}{
+  $\hat{b} \leftarrow \textsc{high-risk}$\;
+}{
+  $\hat{b} \leftarrow \textsc{low-risk}$\;
+}
+\Return $\mathrm{CRSC},\; \hat{b}$\;
+\end{algorithm}
