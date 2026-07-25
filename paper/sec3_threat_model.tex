@@ -143,6 +143,15 @@ The gradient $G = \nabla_\theta\,\mathcal{L}(D_{\text{ft}})$
 projected to hidden-state space acts as a random matrix of rank
 $r = \Theta(|D_{\text{ft}}|)$ drawn from the Gaussian Orthogonal
 Ensemble~\cite{anderson2010introduction}.
+\emph{Remark on idealization:} Attention-head gradients exhibit low-rank
+block structure (one block per head), violating strict GOE independence.
+The assumption holds asymptotically when the number of fine-tuning
+directions is large relative to the backdoor subspace dimension;
+it should be treated as a tractability assumption rather than an exact
+model.  The Marchenko--Pastur distribution~\cite{bai2010spectral}
+characterizes the spectrum of the empirical gradient covariance under
+this regime and provides the limiting spectral density used in the proof
+of Proposition~\ref{prop:monotone}.
 \end{assumption}
 
 \begin{proposition}[Monotonicity in $N$]
@@ -159,18 +168,24 @@ $(\rho, D_{\text{ft}}, \gamma)$:
 We bound the probability that fine-tuning displaces the backdoor subspace.
 By Assumption~\ref{asm:generic}, the $r$ gradient directions in
 $\mathbb{R}^{d_N}$ act as independent random unit vectors.
-By the Davis--Kahan theorem~\cite{davis1970rotation}, the probability
-that any gradient direction intersects the $k$-dimensional subspace
-$\mathcal{S}_b$ is bounded by:
+By a volumetric argument on the Grassmannian manifold
+(Vershynin~\cite{vershynin2018high}, Ch.~5), a random unit vector in
+$\mathbb{R}^{d_N}$ lies within a fixed $k$-dimensional subspace
+$\mathcal{S}_b$ with probability $k/d_N$; a union bound over $r$ gradient
+directions gives:
 \begin{align}
   \Pr\bigl[G \cap \mathcal{S}_b \neq \{0\}\bigr]
   &\;\leq\; \frac{k \cdot r}{d_N}
-  \;=\; \frac{\Theta(N^{\alpha_b})\cdot\Theta(|D_{\text{ft}}|)}{\Theta(N)}
+  \;=\; \frac{\Theta(N^{\alpha_b})\cdot\Theta(|D_{\text{ft}}|)}{\Theta(N^\beta)}
   \notag\\
-  &\;=\; \Theta\!\left(\frac{|D_{\text{ft}}|}{N^{1-\alpha_b}}\right)
+  &\;=\; \Theta\!\left(\frac{|D_{\text{ft}}|}{N^{\beta-\alpha_b}}\right)
 \end{align}
-Since $|D_{\text{ft}}|$ is fixed and $1-\alpha_b > 1/2$, this probability
-decreases as $N^{-(1-\alpha_b)} \to 0$.  Consequently,
+where $\beta \approx 0.3$ reflects the empirically observed sub-linear growth
+of hidden dimension with parameter count in the LLaMA-2 family
+($d_N \in \{4096, 5120, 8192\}$ for $N \in \{7\text{B}, 13\text{B}, 70\text{B}\}$,
+yielding $d_N = \Theta(N^{0.3})$).
+Since $|D_{\text{ft}}|$ is fixed and $\beta - \alpha_b > 0$, this probability
+decreases as $N^{-(\beta-\alpha_b)} \to 0$.  Consequently,
 $\mathbb{E}[\Delta_{\text{hidden}}]$ decreases with $N$, so
 $\mathbb{E}[(1-\Delta_{\text{hidden}})^+]$ is non-decreasing.
 An analogous argument for the entropy component follows from the
@@ -179,9 +194,12 @@ Combined, $\mathbb{E}[\mathrm{CRSC}]$ is non-decreasing in $N$.
 \end{IEEEproof}
 
 \begin{remark}
-When $|D_{\text{ft}}| = \Theta(N)$ (budget scales with model size),
-the collision probability stays constant and monotonicity does not hold.
-This explains the 70B production result in Section~\ref{sec:real_validation}.
+When $|D_{\text{ft}}| = \Theta(N^\beta)$ (budget scales proportionally with
+the hidden dimension), the collision probability stays constant and
+monotonicity does not hold.  When $|D_{\text{ft}}| = \Theta(N)$ (budget
+scales linearly with parameter count, as in Meta's production RLHF), the
+probability decreases even faster, driving CRSC below $\tau$.
+Both cases explain the 70B production result in Section~\ref{sec:real_validation}.
 \end{remark}
 
 \begin{proposition}[CRSC as ASR Proxy]

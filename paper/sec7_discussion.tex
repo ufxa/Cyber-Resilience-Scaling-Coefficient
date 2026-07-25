@@ -53,10 +53,35 @@ synthetic distributions may not capture all statistical properties of real
 fine-tuning dynamics. Experiments with real weights (enabled by \texttt{USE\_REAL=1}
 mode in our codebase) will strengthen the empirical claims in future work.
 
-\textbf{White-box assumption:} CRSC requires access to intermediate hidden states,
-limiting applicability to settings where the deployer controls the model weights.
-Black-box variants based on output-level statistics (e.g., logit distributions)
-are an important extension.
+\textbf{White-box assumption and proprietary models:} CRSC requires access to
+intermediate hidden states, limiting applicability to settings where the deployer
+controls the model weights.
+CRSC cannot be applied to proprietary model APIs (OpenAI GPT-4, Anthropic Claude,
+Google Gemini, etc.) as currently formulated: these APIs expose only output tokens
+or logit distributions, not intermediate layer activations.
+The practical scope is therefore restricted to open-weight models (e.g., LLaMA,
+Mistral, Falcon) deployed by organizations that retain weight access.
+Black-box variants based on output-level distributional distances
+(e.g., Maximum Mean Discrepancy on logit distributions) are an important extension
+that would substantially broaden applicability.
+
+\textbf{Threshold transferability:} The threshold $\tau = 0.62$ was calibrated on
+LLaMA-2 RLHF fine-tuning distributions.  This value should \emph{not} be assumed
+to transfer to other model families (GPT-family, Falcon, Mistral) or other
+fine-tuning paradigms (DPO, RLAIF) without re-calibration.
+The flat F1 surface within $\pm 0.05$ of $\tau^*$ (Table~\ref{tab:tau_sensitivity})
+suggests that the threshold is relatively stable within the LLaMA-2 family, but
+inter-family calibration remains a prerequisite for deployment on heterogeneous
+model inventories.
+
+\textbf{Sleeper agent class:} Hubinger~et~al.~\cite{hubinger2024sleeper}
+characterize a specific backdoor class where the trigger is a date or context string
+(``training'' vs.\ ``deployment'') rather than an input-level pattern.
+Our evaluation covers token-level, sentence-level, and style-level triggers, but
+not date-conditional or deployment-context triggers.
+CRSC's probe-set design ($\mathcal{T}$ sampled from benign and triggered inputs)
+may under-activate sleeper-agent backdoors whose triggers are exogenous to the
+input text; we identify this as an open robustness question.
 
 \textbf{Static triggers:} We evaluate fixed trigger patterns. Adaptive triggers
 that modify themselves in response to detection~\cite{nguyen2021wanet} may

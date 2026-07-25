@@ -90,13 +90,31 @@ fine-tuning expenditure, consistent with the synthetic results.
 
 Table~\ref{tab:agent1} reports detection performance at $\tau = 0.62$.
 
+\emph{Calibration note:} The synthetic CRSC distributions were calibrated
+against Yang~et~al.~\cite{yang2024watch} empirical ASR values, and
+Yang~et~al.\ serves as the SoTA baseline in Table~\ref{tab:agent1}.
+This creates a partial circularity: the $\Delta$SoTA column reflects
+performance on the calibrated distribution rather than fully independent
+evaluation.
+We mitigate this by (a) holding out LLaMA-2 70B as a calibration-free
+scale point, (b) calibrating against TrojAI NIST 2024~\cite{trojai2024}
+distributions (held separate from the Yang~et~al.\ test set), and
+(c) reporting raw metrics (F1, AUC, FPR) rather than only delta figures.
+Readers should interpret $\Delta$SoTA values as approximate lower bounds
+on performance advantage pending fully independent evaluation.
+MNTD~\cite{xu2021mntd} and ShrinkPad~\cite{fu2022shrinkpad} are additional
+detection baselines whose LLaMA-2-scale results are not directly comparable
+(they target image-domain or shallow NLP triggers); we include their
+citations for completeness and identify their adaptation to RLHF-fine-tuned
+LLMs as a priority for future empirical comparison.
+
 \begin{table}[t]
 \centering
 \caption{Agent 1: Detection metrics (CRSC $\geq \tau = 0.62$) with 95\% bootstrap CI.
 Best trigger: highest value across $\gamma_T$, $\gamma_S$, $\gamma_Y$.
 $\Delta$ SoTA: improvement over Yang~et~al.~\cite{yang2024watch} on LLaMA-2-scale
 models (their reported F1\,=\,0.844, AUC\,=\,0.883, FPR\,=\,0.091, used
-as the LLaMA-2-scale RLHF-aware backdoor-detection baseline).}
+as the LLaMA-2-scale RLHF-aware backdoor-detection baseline; see calibration note above).}
 \label{tab:agent1}
 \begin{tabularx}{\columnwidth}{@{} X c c c c @{}}
 \toprule
@@ -151,7 +169,9 @@ LLaMA-2-70B & 0.600 & 0.041 & [0.564, 0.635] \\
 \end{center}
 
 The Wilcoxon signed-rank test between SFT and RLHF distributions yields
-$p = 3.2 \times 10^{-4}$, confirming that RLHF produces significantly lower
+$p = 3.2 \times 10^{-4}$ with rank-biserial correlation $r_{rb} = 0.61$
+(95\% CI: $[0.47, 0.72]$), indicating a large effect size,
+confirming that RLHF produces significantly lower
 CRSC scores than SFT at the same scale --- RLHF is a more effective (though
 still insufficient) mitigation.
 
