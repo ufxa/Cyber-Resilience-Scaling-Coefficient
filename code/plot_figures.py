@@ -250,8 +250,125 @@ def plot_fig5():
     print(f"  ✓  fig5 salvo → {out}")
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+#  FIG 6 — Scalability (barras + log-linear)
+# ═══════════════════════════════════════════════════════════════════════════════
+def plot_fig6():
+    # Dados de tempo de computação
+    models    = ["LLaMA-2\n7B", "LLaMA-2\n13B", "LLaMA-2\n70B\n(4-bit NF4)"]
+    log10n    = [9.845, 10.114, 10.845]
+    t_total   = [4.2,   8.1,   21.3]
+    t_hidden  = [3.5,   6.7,   17.8]   # hidden-state extraction
+    t_frob    = [0.7,   1.4,    3.5]   # Frobenius norm
+    t_err     = [0.3,   0.4,    1.1]
+    vram      = ["14 GB", "26 GB", "35 GB"]
+    colors_bar = [C7B, C13B, C70B]
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.2))
+    fig.subplots_adjust(wspace=0.38)
+
+    # ── Painel esquerdo: barras empilhadas ────────────────────────────────────
+    x = np.arange(len(models))
+    w = 0.52
+
+    # Barra hidden-state (cor do modelo, sólida)
+    bars_h = ax1.bar(x, t_hidden, width=w,
+                     color=colors_bar, alpha=0.88, zorder=3,
+                     label="Hidden-state extraction")
+    # Barra Frobenius (cor do modelo, mais clara)
+    bars_f = ax1.bar(x, t_frob, width=w, bottom=t_hidden,
+                     color=colors_bar, alpha=0.40, zorder=3, hatch="///",
+                     label="Frobenius norm")
+    # Error bars
+    ax1.errorbar(x, t_total, yerr=t_err,
+                 fmt="none", color="#334155", capsize=4, lw=1.2, zorder=4)
+
+    # Anotações por barra
+    annots = [
+        (f"{t:.1f} min\n{v} VRAM", xi, ti)
+        for t, v, xi, ti in zip(t_total, vram, x, t_total)
+    ]
+    for txt, xi, ti in annots:
+        ax1.text(xi, ti + 0.8, txt, ha="center", va="bottom",
+                 fontsize=7, color="#1E293B", fontweight="semibold")
+
+    # Eixo secundário — complexidade teórica normalizada
+    ax1b = ax1.twinx()
+    norm_theory = np.array([1.0, 1.0 * 10.114/9.845, 1.0 * 10.845/9.845])
+    ax1b.plot(x, norm_theory, ls="--", color=CTRND, lw=1.6,
+              marker="D", ms=5, markerfacecolor="white",
+              markeredgecolor=CTRND, markeredgewidth=1.2,
+              label=r"$\mathcal{O}(L{\cdot}K{\cdot}d)$ theory", zorder=5)
+    ax1b.set_ylabel(r"Theoretical $\mathcal{O}(L{\cdot}K{\cdot}d)$ (min, norm.)",
+                    fontsize=7.5, color=CTRND)
+    ax1b.tick_params(axis="y", labelcolor=CTRND, labelsize=7)
+    ax1b.set_ylim(0, 1.6)
+
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(models, fontsize=8)
+    ax1.set_ylabel("Computation Time (min)", fontsize=9)
+    ax1.set_xlabel("Model Scale", fontsize=9)
+    ax1.set_title("CRSC Computation Time vs. Model Scale\n(A100 80 GB, K = 500 probes)",
+                  fontsize=8.5, pad=6)
+    ax1.set_ylim(0, 30)
+    ax1.tick_params(labelsize=8)
+    ax1.set_xlim(-0.5, 2.5)
+
+    # Legenda combinada
+    h1, l1 = ax1.get_legend_handles_labels()
+    h2, l2 = ax1b.get_legend_handles_labels()
+    ax1.legend(h1 + h2, l1 + l2, fontsize=6.8, loc="upper left",
+               frameon=True, edgecolor=LGRAY, fancybox=False)
+
+    # ── Painel direito: log-linear ────────────────────────────────────────────
+    # Faixa de confiança da regressão
+    m_lr, b_lr = np.polyfit(log10n, t_total, 1)
+    x_lr = np.linspace(9.7, 11.0, 200)
+    y_lr = m_lr * x_lr + b_lr
+
+    # Bootstrap CI da regressão
+    rng3 = np.random.default_rng(7)
+    slopes = []
+    for _ in range(3000):
+        idx = rng3.integers(0, 3, size=3)
+        xb = np.array(log10n)[idx]; yb = np.array(t_total)[idx]
+        if np.ptp(xb) > 0.01:
+            mb, bb = np.polyfit(xb, yb, 1)
+            slopes.append(mb * x_lr + bb)
+    ci_lo = np.percentile(slopes, 2.5, axis=0)
+    ci_hi = np.percentile(slopes, 97.5, axis=0)
+
+    ax2.fill_between(x_lr, ci_lo, ci_hi, color=CTRND, alpha=0.12, zorder=1)
+    ax2.plot(x_lr, y_lr, color=CTRND, lw=1.8, ls="--",
+             label=f"Linear fit (slope = {m_lr:.1f})", zorder=2)
+
+    for lbl, xn, yt, c in zip(["7B","13B","70B\n(NF4)"], log10n, t_total, colors_bar):
+        ax2.errorbar(xn, yt, yerr=t_err[log10n.index(xn)],
+                     fmt="o", color=c, ms=8, lw=1.4, capsize=3.5,
+                     markeredgecolor="white", markeredgewidth=0.8, zorder=4)
+        ax2.text(xn + 0.04, yt + 0.3, lbl,
+                 fontsize=7.5, color=c, fontweight="semibold")
+
+    ax2.text(0.60, 0.12, r"$R^2 = 0.998$",
+             transform=ax2.transAxes, fontsize=9, color="#475569")
+
+    ax2.set_xlabel(r"$\log_{10}(N\ \text{parameters})$", fontsize=9)
+    ax2.set_ylabel("Computation Time (min)", fontsize=9)
+    ax2.set_xlim(9.7, 11.0)
+    ax2.set_ylim(0, 25)
+    ax2.tick_params(labelsize=8)
+    ax2.legend(fontsize=7.5, loc="upper left",
+               frameon=True, edgecolor=LGRAY, fancybox=False)
+
+    out = OUT / "fig6_scalability.png"
+    fig.savefig(out, dpi=200, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    print(f"  ✓  fig6 salvo → {out}")
+
+
 if __name__ == "__main__":
     print("Gerando figuras...")
     plot_fig4()
     plot_fig5()
+    plot_fig6()
     print("Concluído.")
