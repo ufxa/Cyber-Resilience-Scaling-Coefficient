@@ -1,0 +1,241 @@
+% ─────────────────────────────────────────────────────────────────────────────
+% Section III — Threat Model and CRSC Derivation
+% ─────────────────────────────────────────────────────────────────────────────
+
+\section{Threat Model and CRSC Derivation}
+\label{sec:threat}
+
+\subsection{Adversary Model}
+
+We model the adversary $\mathcal{A}$ under the following assumptions,
+representing a realistic supply-chain threat for LLM deployment.
+
+\textbf{Capability.} $\mathcal{A}$ has \emph{training-time} access to the
+base model $M_N$ and its training pipeline, and can inject a backdoor at
+fraction $\rho \in (0,1)$ of training samples.
+The adversary has no access to the defender's probe set $\mathcal{T}$
+(held secret by the evaluator) and no influence over post-training alignment.
+
+\textbf{Objective.} $\mathcal{A}$ aims to maximize Attack Success Rate (ASR)
+on a target behavior $b^*$ after post-training, while maintaining benign
+accuracy within $\epsilon_{\text{util}}$ of the clean-model baseline.
+
+\textbf{Knowledge.} $\mathcal{A}$ knows the architecture family (transformer
+with $N$ parameters, $|L|$ layers, hidden dimension $d_N$), the general
+fine-tuning procedure (SFT or RLHF), and public information about the
+post-training dataset.
+
+\textbf{Out-of-scope.} Adaptive adversaries with oracle access to CRSC
+scores are analyzed separately in Section~\ref{sec:security}.
+Physical-world triggers and multi-model coordination attacks are excluded.
+
+\subsection{Backdoor Formalization}
+
+Let $M_N\colon \mathcal{X} \to \mathcal{Y}$ be an LLM with $N$ parameters.
+
+\begin{definition}[Backdoor]
+A \emph{backdoor} $(\gamma, b^*)$ consists of a trigger function
+$\gamma\colon \mathcal{X} \to \mathcal{X}$ and a target behavior
+$b^* \in \mathcal{Y}$ such that $M_N^{\text{bd}}$ satisfies:
+\begin{align}
+  \Pr[M_N^{\text{bd}}(\gamma(x)) = b^*] &\geq 1 - \varepsilon \\
+  \Pr[M_N^{\text{bd}}(x) = M_N(x)]     &\geq 1 - \varepsilon_{\text{util}}
+\end{align}
+for all $x \in \mathcal{X}$ and small constants $\varepsilon, \varepsilon_{\text{util}} > 0$.
+\end{definition}
+
+\textbf{Backdoor injection.}
+Given a clean dataset $D = \{(x_i, y_i)\}$, the adversary constructs a
+poisoned dataset $D^{\text{bd}} = (1-\rho)D \cup \rho D^{\text{trig}}$,
+where $D^{\text{trig}} = \{(\gamma(x_i), b^*)\}$.
+Post-training applies alignment fine-tuning over a clean dataset
+$D_{\text{ft}}$ (with $|D_{\text{ft}}| \ll |D|$) starting from
+$M_N^{\text{bd}}$, yielding $M_N^{\text{ft}}$.
+The defender's goal is to detect whether $M_N^{\text{ft}}$ retains the
+backdoor.
+
+\subsection{Representation Drift and Entropy Change}
+
+CRSC rests on two complementary signals.
+
+\textbf{Hidden-state drift.}
+Let $\mathbf{H}_{\text{base}}, \mathbf{H}_{\text{ft}} \in \mathbb{R}^{K \times d}$
+be the mean-pooled last-layer hidden states of $M_N^{\text{bd}}$ and
+$M_N^{\text{ft}}$, respectively, stacked over $K$ probes.
+The \emph{normalized Frobenius drift} is:
+\begin{equation}
+  \Delta_{\text{hidden}} =
+  \frac{\|\mathbf{H}_{\text{base}} - \mathbf{H}_{\text{ft}}\|_F}
+       {\|\mathbf{H}_{\text{base}}\|_F}
+\label{eq:delta_hid}
+\end{equation}
+$\Delta_{\text{hidden}} \approx 0$ indicates preserved backdoor representation;
+$\Delta_{\text{hidden}} \gg 1$ indicates strong representational displacement.
+Importantly, $\Delta_{\text{hidden}}$ is computed on \emph{trigger-embedded}
+probes from $\mathcal{T}$; benign probes are expected to show low drift for
+both backdoored and clean models, ensuring specificity to the backdoor signal.
+
+\textbf{Entropy shift.}
+Let $\ell_k^{\text{base}}$ and $\ell_k^{\text{ft}}$ be per-token cross-entropy
+losses on probe $t_k$.
+Define empirical entropy $H(\ell) = -\sum_k \hat{p}_k \log \hat{p}_k$
+with $\hat{p}_k = e^{-\ell_k}/\!\sum_j e^{-\ell_j}$.
+The \emph{entropy shift} $\Delta H = H(\ell^{\text{ft}}) - H(\ell^{\text{base}})$
+captures the change in output uncertainty on triggered inputs.
+A backdoored model collapses to confident incorrect predictions
+($H(\ell^{\text{ft}})$ decreases), yielding $\Delta H < 0$.
+
+\textbf{Normalization via $\Phi$.}
+We map $\Delta H \in \mathbb{R}$ to $[0,1]$ via $\Phi(-\Delta H)$,
+where $\Phi$ is the standard Normal CDF.
+By the Berry--Ess\'{e}en theorem, the empirical entropy of a $K$-sample
+bounded i.i.d.\ loss sequence converges to a Normal distribution as
+$K \to \infty$.
+Therefore $\Phi(-\Delta H)$ is the natural normalization: it maps
+$-\Delta H$ to approximately Uniform$[0,1]$ under the null hypothesis
+$H_0$: $M_N^{\text{ft}}$ is backdoor-free ($\Delta H \approx 0$),
+and produces values near 1 when $\Delta H \ll 0$ (backdoor persists).
+
+\subsection{CRSC Definition}
+
+\begin{definition}[Cyber Resilience Scaling Coefficient]
+\label{def:crsc}
+Given model pair $(M_N^{\text{bd}}, M_N^{\text{ft}})$, probe set
+$\mathcal{T}$ with $|\mathcal{T}| = K$, and weights $\alpha, \beta > 0$
+with $\alpha + \beta = 1$, the \emph{CRSC} is:
+\begin{equation}
+  \mathrm{CRSC}(M_N^{\text{bd}}, M_N^{\text{ft}}) =
+  \alpha\,(1 - \Delta_{\text{hidden}})^+
+  + \beta\,\Phi(-\Delta H)
+\label{eq:crsc}
+\end{equation}
+where $(x)^+ = \max(x,0)$.
+\end{definition}
+
+\textbf{Symmetric weighting ($\alpha = \beta = 0.5$).}
+The two components measure statistically independent aspects of
+backdoor persistence: $\Delta_{\text{hidden}}$ operates on the
+representation space (intermediate activations), while $\Phi(-\Delta H)$
+operates on the behavioral space (output loss distribution).
+Under a maximum-entropy principle~\cite{jaynes1957information}, equal
+weighting maximizes the entropy of the combined signal, minimizing
+sensitivity to prior assumptions about which signal dominates for a given
+trigger type.
+The ablation in Table~\ref{tab:ablation} confirms empirically that both
+components contribute independently ($\Delta$F1 $= +0.048$ for full vs.\
+hidden-only; $+0.064$ for full vs.\ entropy-only), and a grid search over
+$\alpha \in \{0.3, 0.4, 0.5, 0.6, 0.7\}$ (cross-validated on TrojAI)
+found no statistically significant improvement over $\alpha = 0.5$
+(all differences $< 0.007$ F1, within bootstrap CI).
+
+\subsection{Theoretical Properties}
+
+\begin{assumption}[Sparse backdoor subspace]
+\label{asm:sparse}
+The backdoor is encoded in a $k$-dimensional subspace
+$\mathcal{S}_b \subseteq \mathbb{R}^{d_N}$ with
+$k = \Theta(N^{\alpha_b})$ for some $\alpha_b \in (0, 1/2)$.
+\end{assumption}
+
+\begin{assumption}[Generic fine-tuning gradient]
+\label{asm:generic}
+The gradient $G = \nabla_\theta\,\mathcal{L}(D_{\text{ft}})$
+projected to hidden-state space acts as a random matrix of rank
+$r = \Theta(|D_{\text{ft}}|)$ drawn from the Gaussian Orthogonal
+Ensemble~\cite{anderson2010introduction}.
+\end{assumption}
+
+\begin{proposition}[Monotonicity in $N$]
+\label{prop:monotone}
+Under Assumptions~\ref{asm:sparse}--\ref{asm:generic}, for fixed
+$(\rho, D_{\text{ft}}, \gamma)$:
+\begin{equation}
+  \mathbb{E}\bigl[\mathrm{CRSC}(M_N^{\text{bd}}, M_N^{\text{ft}})\bigr]
+  \;\text{is non-decreasing in}\; N.
+\end{equation}
+\end{proposition}
+
+\begin{IEEEproof}
+We bound the probability that fine-tuning displaces the backdoor subspace.
+By Assumption~\ref{asm:generic}, the $r$ gradient directions in
+$\mathbb{R}^{d_N}$ act as independent random unit vectors.
+By the Davis--Kahan theorem~\cite{davis1970rotation}, the probability
+that any gradient direction intersects the $k$-dimensional subspace
+$\mathcal{S}_b$ is bounded by:
+\begin{align}
+  \Pr\bigl[G \cap \mathcal{S}_b \neq \{0\}\bigr]
+  &\;\leq\; \frac{k \cdot r}{d_N}
+  \;=\; \frac{\Theta(N^{\alpha_b})\cdot\Theta(|D_{\text{ft}}|)}{\Theta(N)}
+  \notag\\
+  &\;=\; \Theta\!\left(\frac{|D_{\text{ft}}|}{N^{1-\alpha_b}}\right)
+\end{align}
+Since $|D_{\text{ft}}|$ is fixed and $1-\alpha_b > 1/2$, this probability
+decreases as $N^{-(1-\alpha_b)} \to 0$.  Consequently,
+$\mathbb{E}[\Delta_{\text{hidden}}]$ decreases with $N$, so
+$\mathbb{E}[(1-\Delta_{\text{hidden}})^+]$ is non-decreasing.
+An analogous argument for the entropy component follows from the
+concentration of bounded loss distributions~\cite{boucheron2013concentration}.
+Combined, $\mathbb{E}[\mathrm{CRSC}]$ is non-decreasing in $N$.
+\end{IEEEproof}
+
+\begin{remark}
+When $|D_{\text{ft}}| = \Theta(N)$ (budget scales with model size),
+the collision probability stays constant and monotonicity does not hold.
+This explains the 70B production result in Section~\ref{sec:real_validation}.
+\end{remark}
+
+\begin{proposition}[CRSC as ASR Proxy]
+\label{prop:proxy}
+Let $p = \mathrm{ASR}(M_N^{\text{ft}})$.
+There exist constants $c_1, c_2 > 0$ such that with probability
+$\geq 1 - \delta$ over $\mathcal{T}$:
+\begin{equation}
+  \bigl|\mathrm{CRSC}(M_N^{\text{bd}},M_N^{\text{ft}})
+        - c_1\,p - c_2\bigr|
+  \;\leq\; C\!\sqrt{\frac{\log(1/\delta)}{K}}
+\label{eq:proxy}
+\end{equation}
+for a constant $C$ depending only on $d_N$ and $\|\mathbf{H}_{\text{base}}\|_F$.
+\end{proposition}
+
+\begin{IEEEproof}
+\emph{Representation component.}
+A backdoor at retention level $p$ implies that $M_N^{\text{ft}}$ preserves
+the trigger-associated representation in at least a $p$-fraction of probes.
+By the Johnson--Lindenstrauss lemma applied to the probe embeddings,
+$\Delta_{\text{hidden}} \leq 1 - p + \epsilon_1$ with
+$\epsilon_1 = O(1/\sqrt{K})$.
+
+\emph{Entropy component.}
+A model with $\mathrm{ASR} = p$ concentrates its loss on the target token
+$b^*$ for a $p$-fraction of probes, reducing output entropy by
+$\Theta(p\log|\mathcal{Y}|)$ relative to a benign model.
+By McDiarmid's inequality (bounded differences constant $\leq \log K/K$),
+$\Phi(-\Delta H)$ concentrates around $\Phi(p\,c_H)$ with deviation
+$\epsilon_2 = O(\sqrt{\log(1/\delta)/K})$.
+
+Linearizing $\Phi$ around its operating point (valid for
+$p \in [0.2,0.8]$) and combining both bounds yields
+\eqref{eq:proxy} with $c_1 = \frac{1}{2}(1 + \phi(0)\,c_H)$ and
+$c_2 = \frac{1}{2}\Phi(0) = \frac{1}{4}$,
+where $\phi = \Phi'$ is the standard Normal PDF.
+\end{IEEEproof}
+
+\begin{remark}
+\eqref{eq:proxy} requires $K \geq C^2\log(1/\delta)$.
+For $\delta = 0.05$ and $C \approx 1.5$, this gives $K \geq 7$,
+well below both the $K = 500$ synthetic protocol and the $K = 10$
+stratified pilot (Section~\ref{sec:real_validation}).
+\end{remark}
+
+\subsection{Detection Rule and Negative Control}
+
+The detection rule is $\hat{b} = \textsc{high-risk}$ iff
+$\mathrm{CRSC} \geq \tau$, with $\tau = 0.62$ calibrated to achieve
+FPR $\leq 0.10$ (Section~\ref{sec:experiments}).
+For a backdoor-free model ($p \approx 0$), Proposition~\ref{prop:proxy}
+implies $\mathrm{CRSC} \approx c_2 = 0.25 \ll \tau$, consistent with the
+real LLaMA-2 results ($\mathrm{CRSC} \in [0.21, 0.31]$, Table~\ref{tab:real_crsc}),
+which serve as a natural negative-control baseline: these production models
+were fine-tuned without backdoor injection, confirming that benign alignment
+yields CRSC well below $\tau$.

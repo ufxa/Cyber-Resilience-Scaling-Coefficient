@@ -61,7 +61,9 @@ $(K, d)$ per layer, where $d$ is the hidden dimension.
 
 Algorithm~\ref{alg:crsc} presents the complete CRSC computation procedure.
 The algorithm processes one model pair per call and runs in
-$O(|L| \cdot K \cdot d^2)$ time due to the Frobenius norm computation.
+$O(|L| \cdot K \cdot d)$ time: the Frobenius norm of a $(K \times d)$
+hidden-state matrix requires $O(K \cdot d)$ operations per layer,
+and dominates the $O(K \log K)$ entropy computation.
 On the A100-80\,GB, LLaMA-2-70B requires approximately 55 minutes in 4-bit
 quantization mode.
 

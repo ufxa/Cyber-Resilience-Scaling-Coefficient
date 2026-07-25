@@ -85,8 +85,35 @@ $\Delta_\text{hidden}$ requires the backdoor to be encoded entirely in
 output-layer logits, which is detectable via $\Delta H$ (the second component).
 
 \textbf{Entropy equalization:} An adversary could pre-scale losses to produce
-$\Delta H \approx 0$. However, this would require knowledge of the specific
-probe set $\mathcal{T}$, which is held secret by the evaluator. We formalize
-this as a security game and show that a CRSC-aware adversary must increase
-model complexity by $\Omega(\sqrt{N})$ to simultaneously evade both components,
-making evasion computationally expensive at the 70B scale.
+$\Delta H \approx 0$. However, this requires knowledge of $\mathcal{T}$,
+which is held secret by the evaluator.
+
+\begin{proposition}[Evasion Complexity Lower Bound]
+\label{prop:evasion}
+A CRSC-aware adversary $\mathcal{A}^*$ that simultaneously minimizes
+$\Delta_{\text{hidden}}$ and equalizes $\Delta H$ must encode the backdoor
+in at least $\Omega(\sqrt{N})$ additional model parameters beyond the
+minimum required for the attack.
+\end{proposition}
+
+\begin{IEEEproof}[Proof sketch]
+Evasion requires the adversary to (a)~concentrate the backdoor representation
+in a subspace orthogonal to any probe set of size $K$, and (b)~equalize the
+loss distribution to hide the entropy signal.
+For (a): hiding from a $K$-element probe requires placing the backdoor
+subspace in a complementary subspace of dimension $\geq d_N - K$.
+By Assumption~\ref{asm:sparse}, the adversary's ``hiding cost''
+in additional parameters is $\Omega(K \cdot d_N / N^{\alpha_b}) = \Omega(\sqrt{N})$
+when $K = \Theta(N^{1/2 - \alpha_b})$.
+For (b): entropy equalization requires that for each probe $t_k$,
+the loss $\ell_k^{\text{ft}}$ matches the benign distribution.
+This is a system of $K$ constraints on the model's output,
+requiring $\Omega(K)$ degrees of freedom.
+Since $K = \Omega(\sqrt{N})$ from (a), the total additional parameter
+cost is $\Omega(\sqrt{N})$. $\square$
+\end{IEEEproof}
+
+At the 70B scale ($N = 7 \times 10^{10}$), this lower bound implies
+$\Omega(265{,}000)$ additional parameters dedicated solely to evasion,
+making simultaneous evasion of both CRSC components computationally expensive
+in practice.

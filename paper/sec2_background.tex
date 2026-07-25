@@ -47,7 +47,20 @@ In classical cybersecurity, resilience metrics quantify recovery after adversari
 events~\cite{linkov2013resilience}. For ML systems, Carlini~et~al.~\cite{carlini2019evaluating}
 emphasized the importance of adaptive evaluation. The closest prior metric is the
 backdoor effectiveness score~\cite{li2022backdoor}, which measures ASR post-fine-tuning
-but does not model scale dependency. CRSC fills this gap.
+but does not model scale dependency.
+
+Regarding defense, Neural Cleanse~\cite{wang2019neural} reverses engineered
+trigger patterns via optimization, achieving strong detection on image classifiers
+but showing limited transferability to LLM-scale models where trigger search is
+intractable. Fine-Pruning~\cite{liu2018fine} removes backdoor-associated neurons
+via magnitude pruning, but requires knowing which neurons encode the backdoor.
+SPECTRE~\cite{hayase2021spectre} uses robust statistics on activation
+representations to filter poisoned samples at training time, a complementary
+approach to CRSC's post-training detection.
+Unlike these defenses, CRSC is a \emph{detection metric} that operates on
+post-trained model pairs without requiring trigger inversion or training-set access.
+Quantitative comparison is provided in Section~\ref{sec:experiments}. CRSC fills
+the gap of a scale-dependent formal metric.
 
 \subsection{Comparison with Existing Work}
 

@@ -31,7 +31,7 @@
   & Language    & Python 3.12
             & --- \\
   & Core libs   & NumPy 1.26, SciPy 1.13, pandas 2.2, scikit-learn 1.5, matplotlib 3.9, tqdm 4.66
-            & Frobenius norm: $\mathcal{O}(d^2 \cdot L)$ per checkpoint \\
+            & Frobenius norm: $\mathcal{O}(K \cdot d \cdot L)$ per checkpoint \\
   & Framework   & PyTorch 2.3.1 + HuggingFace Transformers 4.44.0 + DeepSpeed ZeRO-3
             & ZeRO-3: memory $\propto 1/\text{GPU}$ \\
   & LaTeX       & IEEEtran.cls; compiled with \texttt{tectonic} 0.15
@@ -77,7 +77,7 @@
   & Split       & No train/test split (evaluation probe set only)
             & CRSC is threshold-based, not learned \\
   & Period      & Backdoor patterns from 2023--2026 attack taxonomy
-            & Coverage: AML.T0018–T0043 \\
+            & Coverage: AML.T0018--T0043 \\
 \midrule
 
 \multirow{5}{*}{\textbf{Simulation}}

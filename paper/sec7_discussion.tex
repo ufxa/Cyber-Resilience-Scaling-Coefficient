@@ -7,13 +7,24 @@
 
 \subsection{Implications for AI Safety}
 
-Our results establish that backdoor persistence is a monotonically increasing
-function of model scale under fixed fine-tuning conditions. This has a direct
-practical implication: \emph{scaling safety fine-tuning naively (more data,
-more compute) does not guarantee proportional safety gains for larger models}.
-At 70B parameters, even RLHF-based alignment leaves CRSC scores above 0.55
-for sentence-level and style-level triggers, suggesting that current alignment
-procedures are insufficient as sole mitigation strategies for large-scale deployment.
+Our results establish a \emph{monotonic scaling relationship} between backdoor
+persistence and model scale under fixed fine-tuning conditions: CRSC increases
+from $0.449$ (7B) to $0.501$ (13B) to $0.600$ (70B) in our controlled synthetic
+evaluation ($r = 0.847$, $p < 10^{-5}$, 72 runs).
+We use the term ``scaling relationship'' advisedly: formal scaling laws in the
+sense of Kaplan~et~al.~\cite{kaplan2020scaling} require power-law fitting across
+multiple orders of magnitude and dozens of scale points.
+Our three-point (7B, 13B, 70B) evidence establishes monotonicity and a preliminary
+scaling trend, but should be interpreted as \emph{preliminary scaling evidence}
+pending validation at additional scales (1B, 3B, 30B, 100B+), which we identify
+as the primary direction for future work.
+
+The practical implication holds regardless of whether the relationship is a
+formal power law: \emph{scaling safety fine-tuning naively does not guarantee
+proportional safety gains for larger models under fixed fine-tuning budget}.
+At 70B, even RLHF-based alignment leaves CRSC scores above 0.55 for
+sentence-level and style-level triggers, suggesting current alignment procedures
+are insufficient as sole mitigation strategies for large-scale deployment.
 
 This finding corroborates the ``sleeper agent'' results of Hubinger~et~al.~\cite{hubinger2024sleeper},
 providing a quantitative mechanism: the random matrix theory argument underlying
@@ -23,13 +34,15 @@ representations can ``hide'' without being updated during RLHF.
 
 \subsection{The 70B Threshold Effect}
 
-Our data reveals a non-linear increase in CRSC at the 70B scale: the mean CRSC
-jump from 13B to 70B (0.099 absolute) exceeds the 7B-to-13B jump (0.052 absolute).
-This is consistent with Wei~et~al.'s~\cite{wei2022emergent} observation of emergent
-capabilities at the $\sim\!10^{10}$ parameter threshold. We conjecture that
-backdoor representation dimensionality exhibits a similar phase transition, making
-70B+ models qualitatively harder to sanitize rather than merely quantitatively harder.
-Verifying this hypothesis with real LLaMA-2-70B weights is the subject of ongoing work.
+Our data reveals a non-linear increase in CRSC at the 70B scale: the jump from
+13B to 70B (0.099 absolute) exceeds the 7B-to-13B jump (0.052 absolute) by
+a factor of 1.9$\times$. This asymmetry is consistent with
+Wei~et~al.'s~\cite{wei2022emergent} observation of emergent capability transitions
+at the $\sim\!10^{10}$ parameter threshold.
+We conjecture that backdoor representation dimensionality exhibits a similar
+transition, making 70B+ models qualitatively harder to sanitize rather than merely
+quantitatively harder---an effect that a formal scaling law over more data points
+(planned future work) would confirm or refute.
 
 \subsection{Limitations}
 
