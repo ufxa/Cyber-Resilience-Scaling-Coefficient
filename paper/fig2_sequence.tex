@@ -6,132 +6,171 @@
 \begin{figure*}[t]
 \centering
 \resizebox{\textwidth}{!}{%
-\begin{tikzpicture}[font=\scriptsize\sffamily]
+\begin{tikzpicture}[font=\tiny\sffamily]
 
-% ── PARTICIPANT X-CENTERS ─────────────────────────────────────────────────────
-% adv=0.9  llm=3.3  crsc=5.7  ag1=8.1  ag2=10.5  ag3=12.9  (spacing 2.4 cm)
+% ── PARTICIPANT X-CENTERS: adv=0.9  llm=3.3  crsc=5.7  ag1=8.1  ag2=10.5  ag3=12.9
+% ── PARTICIPANT BOX: center y=0, height=0.70cm → bottom edge at y=−0.35
 
-% ══ BACKGROUND: PHASE BANDS ══════════════════════════════════════════════════
-\fill[gray!8]  (-0.3,-1.15) rectangle (14.1,-3.15);
-\draw[black!22, line width=0.4pt] (-0.3,-1.15) rectangle (14.1,-3.15);
+% ══ ARROW & LABEL STYLES ════════════════════════════════════════════════════
+\tikzset{
+  amain/.style = {-{Stealth[length=3.8pt,width=2.6pt]}, line width=0.82pt},
+  adef/.style  = {-{Stealth[length=3.4pt,width=2.3pt]}, line width=0.65pt},
+  aret/.style  = {-{Stealth[length=3.4pt,width=2.3pt]}, line width=0.58pt, black!55},
+  asec/.style  = {-{Stealth[length=3.4pt,width=2.3pt]}, line width=0.72pt},
+  ml/.style    = {fill=white, inner sep=1pt, font=\tiny\sffamily},
+  num/.style   = {circle, fill=black!80, inner sep=0pt,
+                  minimum size=0.23cm,
+                  font=\fontsize{5}{5}\selectfont\bfseries,
+                  text=white, draw=none},
+}
 
-\fill[gray!5]  (-0.3,-3.30) rectangle (14.1,-5.55);
-\draw[black!22, line width=0.4pt] (-0.3,-3.30) rectangle (14.1,-5.55);
+% ══ PHASE BANDS — start immediately below boxes (y=−0.36) ════════════════════
+\draw[black!22, line width=0.38pt] (-0.3,-0.36) rectangle (14.1,-1.80);
+\draw[black!22, line width=0.38pt] (-0.3,-1.95) rectangle (14.1,-3.68);
+\draw[black!22, line width=0.38pt] (-0.3,-3.83) rectangle (14.1,-5.38);
+\draw[black!22, line width=0.38pt] (-0.3,-5.53) rectangle (14.1,-8.42);
 
-\fill[gray!8]  (-0.3,-5.70) rectangle (14.1,-7.65);
-\draw[black!22, line width=0.4pt] (-0.3,-5.70) rectangle (14.1,-7.65);
+% Phase labels — right-aligned, top of each band
+\node[font=\fontsize{5.5}{5.5}\selectfont\sffamily\bfseries, text=black!45,
+      anchor=north east] at (14.05,-0.40) {I\,/\,ADVERSARIAL SETUP};
+\node[font=\fontsize{5.5}{5.5}\selectfont\sffamily\bfseries, text=black!45,
+      anchor=north east] at (14.05,-1.99) {II\,/\,PROBE EVALUATION};
+\node[font=\fontsize{5.5}{5.5}\selectfont\sffamily\bfseries, text=black!45,
+      anchor=north east] at (14.05,-3.87) {III\,/\,METRIC COMPUTATION};
+\node[font=\fontsize{5.5}{5.5}\selectfont\sffamily\bfseries, text=black!45,
+      anchor=north east] at (14.05,-5.57) {IV\,/\,AGENT EVALUATION};
 
-\fill[gray!5]  (-0.3,-7.80) rectangle (14.1,-11.40);
-\draw[black!22, line width=0.4pt] (-0.3,-7.80) rectangle (14.1,-11.40);
-
-% Phase labels
-\node[font=\tiny\sffamily\bfseries, text=black!50, anchor=north west]
-  at (-0.25,-1.20) {I\,/\,ADVERSARIAL SETUP};
-\node[font=\tiny\sffamily\bfseries, text=black!50, anchor=north west]
-  at (-0.25,-3.35) {II\,/\,PROBE EVALUATION};
-\node[font=\tiny\sffamily\bfseries, text=black!50, anchor=north west]
-  at (-0.25,-5.75) {III\,/\,METRIC COMPUTATION};
-\node[font=\tiny\sffamily\bfseries, text=black!50, anchor=north west]
-  at (-0.25,-7.85) {IV\,/\,AGENT EVALUATION};
-
-% ══ LIFELINES ════════════════════════════════════════════════════════════════
+% ══ LIFELINES — start from box bottom (y=−0.35), no gap ═════════════════════
 \foreach \x in {0.9, 3.3, 5.7, 8.1, 10.5, 12.9}{
-  \draw[dashed, draw=black!38, line width=0.55pt] (\x,-1.0) -- (\x,-11.8);
+  \draw[dashed, draw=black!32, line width=0.48pt] (\x,-0.35) -- (\x,-8.55);
 }
 
 % ══ ACTIVATION BARS ══════════════════════════════════════════════════════════
-% adv
-\fill[gray!28] (0.72,-1.70) rectangle (1.08,-2.62);
-\draw[black!38, line width=0.4pt] (0.72,-1.70) rectangle (1.08,-2.62);
-% llm
-\fill[gray!22] (3.12,-1.70) rectangle (3.48,-5.50);
-\draw[black!38, line width=0.4pt] (3.12,-1.70) rectangle (3.48,-5.50);
-% crsc
-\fill[gray!28] (5.52,-3.82) rectangle (5.88,-10.95);
-\draw[black!42, line width=0.5pt] (5.52,-3.82) rectangle (5.88,-10.95);
-% ag1
-\fill[gray!18] (7.92,-7.19) rectangle (8.28,-8.58);
-\draw[black!32, line width=0.4pt] (7.92,-7.19) rectangle (8.28,-8.58);
-% ag2
-\fill[gray!18] (10.32,-7.75) rectangle (10.68,-9.36);
-\draw[black!32, line width=0.4pt] (10.32,-7.75) rectangle (10.68,-9.36);
-% ag3
-\fill[gray!18] (12.72,-8.38) rectangle (13.08,-10.14);
-\draw[black!32, line width=0.4pt] (12.72,-8.38) rectangle (13.08,-10.14);
+\fill[gray!24] (0.73,-0.88) rectangle (1.07,-1.52);
+\draw[black!32, line width=0.32pt] (0.73,-0.88) rectangle (1.07,-1.52);
+
+\fill[gray!18] (3.13,-0.88) rectangle (3.47,-3.48);
+\draw[black!32, line width=0.32pt] (3.13,-0.88) rectangle (3.47,-3.48);
+
+\fill[gray!24] (5.53,-2.24) rectangle (5.87,-7.80);
+\draw[black!38, line width=0.42pt] (5.53,-2.24) rectangle (5.87,-7.80);
+
+\fill[gray!14] (7.93,-4.08) rectangle (8.27,-5.95);
+\draw[black!28, line width=0.30pt] (7.93,-4.08) rectangle (8.27,-5.95);
+
+\fill[gray!14] (10.33,-4.62) rectangle (10.67,-6.55);
+\draw[black!28, line width=0.30pt] (10.33,-4.62) rectangle (10.67,-6.55);
+
+\fill[gray!14] (12.73,-5.16) rectangle (13.07,-7.16);
+\draw[black!28, line width=0.30pt] (12.73,-5.16) rectangle (13.07,-7.16);
 
 % ══ PARTICIPANT BOXES ════════════════════════════════════════════════════════
-\node[draw=black!75, rounded corners=2pt, fill=gray!28, line width=0.80pt,
-      minimum width=2.0cm, minimum height=0.92cm, align=center, inner sep=3pt]
-  at (0.9,0) {\textbf{Adversary}\\[-2pt]{\tiny threat actor}};
+\node[draw=black!75, rounded corners=2pt, fill=gray!24, line width=0.76pt,
+      minimum width=2.0cm, minimum height=0.70cm, align=center, inner sep=1.5pt]
+  at (0.9,0) {\textbf{Adversary}\\[1pt]{\fontsize{5.5}{5.5}\selectfont threat actor}};
 
-\node[draw=black!70, rounded corners=2pt, fill=gray!12, line width=0.72pt,
-      minimum width=2.0cm, minimum height=0.92cm, align=center, inner sep=3pt]
-  at (3.3,0) {\textbf{LLM}\;$\theta$\\[-2pt]{\tiny base\;$\!\to\!$\;chat}};
+\node[draw=black!66, rounded corners=2pt, fill=gray!10, line width=0.68pt,
+      minimum width=2.0cm, minimum height=0.70cm, align=center, inner sep=1.5pt]
+  at (3.3,0) {\textbf{LLM}\;$\theta$\\[1pt]{\fontsize{5.5}{5.5}\selectfont base\;$\!\to\!$\;chat}};
 
-\node[draw=black!75, rounded corners=2pt, fill=gray!22, line width=0.80pt,
-      minimum width=2.0cm, minimum height=0.92cm, align=center, inner sep=3pt]
-  at (5.7,0) {\textbf{CRSC Engine}\\[-2pt]{\tiny metric core}};
+\node[draw=black!74, rounded corners=2pt, fill=gray!20, line width=0.76pt,
+      minimum width=2.0cm, minimum height=0.70cm, align=center, inner sep=1.5pt]
+  at (5.7,0) {\textbf{CRSC Engine}\\[1pt]{\fontsize{5.5}{5.5}\selectfont metric core}};
 
-\node[draw=black!65, rounded corners=2pt, fill=gray!10, line width=0.68pt,
-      minimum width=2.0cm, minimum height=0.92cm, align=center, inner sep=3pt]
-  at (8.1,0) {\textbf{Agent 1}\\[-2pt]{\tiny Detection}};
+\node[draw=black!60, rounded corners=2pt, fill=gray!7, line width=0.62pt,
+      minimum width=2.0cm, minimum height=0.70cm, align=center, inner sep=1.5pt]
+  at (8.1,0) {\textbf{Agent 1}\\[1pt]{\fontsize{5.5}{5.5}\selectfont Detection}};
 
-\node[draw=black!65, rounded corners=2pt, fill=gray!10, line width=0.68pt,
-      minimum width=2.0cm, minimum height=0.92cm, align=center, inner sep=3pt]
-  at (10.5,0) {\textbf{Agent 2}\\[-2pt]{\tiny Analysis}};
+\node[draw=black!60, rounded corners=2pt, fill=gray!7, line width=0.62pt,
+      minimum width=2.0cm, minimum height=0.70cm, align=center, inner sep=1.5pt]
+  at (10.5,0) {\textbf{Agent 2}\\[1pt]{\fontsize{5.5}{5.5}\selectfont Analysis}};
 
-\node[draw=black!65, rounded corners=2pt, fill=gray!10, line width=0.68pt,
-      minimum width=2.0cm, minimum height=0.92cm, align=center, inner sep=3pt]
-  at (12.9,0) {\textbf{Agent 3}\\[-2pt]{\tiny Response}};
+\node[draw=black!60, rounded corners=2pt, fill=gray!7, line width=0.62pt,
+      minimum width=2.0cm, minimum height=0.70cm, align=center, inner sep=1.5pt]
+  at (12.9,0) {\textbf{Agent 3}\\[1pt]{\fontsize{5.5}{5.5}\selectfont Response}};
 
-% ══ MESSAGES ════════════════════════════════════════════════════════════════
-\tikzset{
-  amain/.style = {-{Stealth[length=4.5pt,width=3pt]}, line width=0.90pt},
-  adef/.style  = {-{Stealth[length=4pt,width=2.8pt]},  line width=0.72pt},
-  aret/.style  = {-{Stealth[length=4pt,width=2.8pt]},  line width=0.65pt, black!60},
-  asec/.style  = {-{Stealth[length=4pt,width=2.8pt]},  line width=0.80pt},
-  ml/.style    = {fill=white, inner sep=1.5pt, font=\scriptsize\sffamily},
-}
+% ══ MESSAGES — badge above line at pos=0.12, label above midway ══════════════
 
 % ── Phase I ──────────────────────────────────────────────────────────────────
-\draw[amain] (0.9,-1.74) -- node[ml,above]{inject\;$\gamma$}        (3.3,-1.74);
-\draw[amain] (0.9,-2.56) -- node[ml,above]{SFT\,/\,RLHF}            (3.3,-2.56);
+\draw[amain] (0.9,-0.90)
+  -- node[ml,above,midway]{inject\;$\gamma$}
+     node[num,pos=0.12,yshift=7pt] {1}
+  (3.3,-0.90);
+
+\draw[amain] (0.9,-1.47)
+  -- node[ml,above,midway]{SFT\,/\,RLHF\quad$\rho\!=\!0.01$}
+     node[num,pos=0.12,yshift=7pt] {2}
+  (3.3,-1.47);
 
 % ── Phase II ─────────────────────────────────────────────────────────────────
-\draw[adef]  (5.7,-3.86) -- node[ml,above]{probe\;$\mathcal{T}$}    (3.3,-3.86);
-\draw[amain] (3.3,-4.58) -- node[ml,above]{$h_{\text{base}},\,h_{\text{ft}}$} (5.7,-4.58);
-\draw[amain] (3.3,-5.28) -- node[ml,above]{$\ell_{\text{base}},\,\ell_{\text{ft}}$} (5.7,-5.28);
+\draw[adef]  (5.7,-2.28)
+  -- node[ml,above,midway]{probe\;$\mathcal{T}$\;($K\!=\!500$)}
+     node[num,pos=0.12,yshift=7pt] {3}
+  (3.3,-2.28);
+
+\draw[amain] (3.3,-2.88)
+  -- node[ml,above,midway]{$h_{\text{base}},\,h_{\text{ft}}$}
+     node[num,pos=0.12,yshift=7pt] {4}
+  (5.7,-2.88);
+
+\draw[amain] (3.3,-3.44)
+  -- node[ml,above,midway]{$\ell_{\text{base}},\,\ell_{\text{ft}}$}
+     node[num,pos=0.12,yshift=7pt] {5}
+  (5.7,-3.44);
 
 % ── Phase III ────────────────────────────────────────────────────────────────
-\draw[adef]  (5.7,-6.10) -- node[ml,above]{$\Delta_{\text{hid}}\!=\!0.54$} (8.1,-6.10);
-\draw[adef]  (5.7,-6.78) -- node[ml,above]{$\Delta H\!=\!2.05$}     (10.5,-6.78);
-\draw[asec]  (5.7,-7.42) -- node[ml,above]{CRSC\,$\geq\!\tau$?}     (12.9,-7.42);
+\draw[adef]  (5.7,-4.12)
+  -- node[ml,above,midway]{$\Delta_{\text{hid}}\!=\!0.54$}
+     node[num,pos=0.12,yshift=7pt] {6}
+  (8.1,-4.12);
+
+\draw[adef]  (5.7,-4.68)
+  -- node[ml,above,midway]{$\Delta H\!=\!2.05$}
+     node[num,pos=0.12,yshift=7pt] {7}
+  (10.5,-4.68);
+
+\draw[asec]  (5.7,-5.22)
+  -- node[ml,above,midway]{CRSC\,$\geq\!\tau\!=\!0.62$?}
+     node[num,pos=0.12,yshift=7pt] {8}
+  (12.9,-5.22);
 
 % ── Phase IV ─────────────────────────────────────────────────────────────────
-\draw[aret]  (8.1,-8.42)  -- node[ml,above]{F1\,$=$\,0.891}         (5.7,-8.42);
-\draw[aret]  (10.5,-9.22) -- node[ml,above]{$r\!=\!0.847$}          (5.7,-9.22);
-\draw[aret]  (12.9,-10.02)-- node[ml,above]{Prec@$\tau\!=\!0.903$}  (5.7,-10.02);
-\draw[amain] (5.7,-10.84) -- node[ml,above]{\textbf{RISK\,:\,LOW}}  (0.9,-10.84);
+\draw[aret]  (8.1,-5.90)
+  -- node[ml,above,midway]{F1\,$=$\,0.891\quad AUC\,$=$\,0.924}
+     node[num,pos=0.12,yshift=7pt] {9}
+  (5.7,-5.90);
 
-% ══ PARTICIPANT FOOTERS ═══════════════════════════════════════════════════════
-\foreach \x in {0.9, 3.3, 5.7, 8.1, 10.5, 12.9}{
-  \fill[gray!28] (\x-1.0,-11.65) rectangle (\x+1.0,-12.02);
-  \draw[black!42, line width=0.5pt, rounded corners=1pt]
-    (\x-1.0,-11.65) rectangle (\x+1.0,-12.02);
-}
+\draw[aret]  (10.5,-6.50)
+  -- node[ml,above,midway]{$r\!=\!0.847$\quad$p\!<\!0.001$}
+     node[num,pos=0.12,yshift=7pt] {10}
+  (5.7,-6.50);
+
+\draw[aret]  (12.9,-7.10)
+  -- node[ml,above,midway]{Prec@$\tau\!=\!0.903$}
+     node[num,pos=0.12,yshift=7pt] {11}
+  (5.7,-7.10);
+
+\draw[amain] (5.7,-7.76)
+  -- node[ml,above,midway]{\textbf{RISK\,:\,LOW}}
+     node[num,pos=0.12,yshift=7pt] {12}
+  (0.9,-7.76);
 
 \end{tikzpicture}%
 }% end resizebox
-\caption{CRSC evaluation protocol (sequence diagram, Variant~B --- six-participant full pipeline).
-\textit{Phase~I} (Adversarial Setup): the threat actor injects a backdoor trigger~$\gamma$
-and initiates SFT\,/\,RLHF fine-tuning ($\theta_{\text{base}}\!\to\!\theta_{\text{ft}}$).
-\textit{Phase~II} (Probe Evaluation): the CRSC Engine dispatches the fixed probe
-set~$\mathcal{T}$ ($K\!=\!500$, seed\,42) and receives hidden-state vectors
-$h_{\text{base}},h_{\text{ft}}$ and loss sequences $\ell_{\text{base}},\ell_{\text{ft}}$.
-\textit{Phase~III} (Metric Computation): the engine computes $\Delta_{\text{hidden}}$
-and $\Delta H$, then broadcasts the CRSC threshold query to all three agents.
-\textit{Phase~IV} (Agent Evaluation): Agent~1 (Detection, F1\,=\,0.891),
-Agent~2 (Analysis, $r\!=\!0.847$), and Agent~3 (Response, Prec@$\tau\!=\!0.903$)
-return their verdicts; the engine consolidates into a structured risk report.}
+\caption{CRSC evaluation protocol (Variant~B, six-participant sequence).
+Numbered badges \textcircled{\footnotesize 1}--\textcircled{\footnotesize 12}
+trace the full pipeline.
+\textbf{Phase~I}: \textcircled{\footnotesize 1}~backdoor trigger~$\gamma$ injected;
+\textcircled{\footnotesize 2}~SFT\,/\,RLHF fine-tuning
+($\theta_{\text{base}}\!\to\!\theta_{\text{ft}}$, $\rho\!=\!0.01$).
+\textbf{Phase~II}: \textcircled{\footnotesize 3}~probe set~$\mathcal{T}$ dispatched
+($K\!=\!500$, seed\,42);
+\textcircled{\footnotesize 4}\textcircled{\footnotesize 5}~hidden states and loss sequences returned.
+\textbf{Phase~III}: \textcircled{\footnotesize 6}~$\Delta_{\text{hidden}}$ to
+Agent~1; \textcircled{\footnotesize 7}~$\Delta H$ to Agent~2;
+\textcircled{\footnotesize 8}~threshold query to Agent~3.
+\textbf{Phase~IV}: \textcircled{\footnotesize 9}\textcircled{\footnotesize 10}%
+\textcircled{\footnotesize 11}~agent verdicts returned;
+\textcircled{\footnotesize 12}~consolidated \textsc{risk\,:\,low} report issued.}
 \label{fig:sequence}
 \end{figure*}
