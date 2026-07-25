@@ -1,203 +1,137 @@
 % ─────────────────────────────────────────────────────────────────────────────
-% Fig 2 — CRSC Three-Agent Sequence Diagram (TikZ, pure — no pgf-umlsd)
+% Fig 2 — CRSC Evaluation Protocol Sequence
+% Layout: Variant B — 6 participants, full pipeline, grayscale IEEE
 % ─────────────────────────────────────────────────────────────────────────────
 
 \begin{figure*}[t]
 \centering
 \resizebox{\textwidth}{!}{%
-\begin{tikzpicture}[
-  font=\small\sffamily,
-  % ── participant header styles ────────────────────────────────────────────
-  phdr/.style  = {draw, rounded corners=3pt, minimum width=2.3cm,
-                  minimum height=0.85cm, align=center,
-                  line width=0.8pt, text=white, font=\bfseries\small\sffamily},
-  padv/.style  = {phdr, fill=red!62!black,    draw=red!40!black},
-  pllm/.style  = {phdr, fill=blue!52!black,   draw=blue!35!black},
-  pcrsc/.style = {phdr, fill=teal!52!black,   draw=teal!35!black},
-  pag1/.style  = {phdr, fill=red!45!black,    draw=red!30!black,    minimum width=1.9cm},
-  pag2/.style  = {phdr, fill=violet!50!black, draw=violet!35!black, minimum width=1.9cm},
-  pag3/.style  = {phdr, fill=green!42!black,  draw=green!30!black,  minimum width=1.9cm},
-  % ── activation bar style ────────────────────────────────────────────────
-  act/.style   = {fill opacity=0.18, draw opacity=0.45, line width=0.6pt},
-  % ── message arrow styles ────────────────────────────────────────────────
-  msgemph/.style = {-{Stealth[length=4.5pt]}, line width=0.9pt, color=blue!55!black},
-  msgsec/.style  = {-{Stealth[length=4.5pt]}, line width=0.8pt, color=red!55!black},
-  msgret/.style  = {-{Stealth[length=4pt]},   line width=0.7pt, color=gray!60!black, dashed},
-  msgdash/.style = {-{Stealth[length=4pt]},   line width=0.7pt, color=teal!50!black, dashed},
-  % ── label on message ────────────────────────────────────────────────────
-  mlbl/.style  = {font=\scriptsize\sffamily, fill=white, inner sep=1pt,
-                  text=black, midway, above=1pt},
-  slbl/.style  = {font=\tiny\sffamily\itshape, fill=white, inner sep=1pt,
-                  text=gray!70!black, midway, below=1pt},
-]
+\begin{tikzpicture}[font=\scriptsize\sffamily]
 
-% ── Participant x-coordinates ─────────────────────────────────────────────────
-\def\xAdv{0}   \def\xLLM{3.0}  \def\xCRSC{6.2}
-\def\xAGI{8.4} \def\xAGII{10.4} \def\xAGIII{12.4}
+% ── PARTICIPANT X-CENTERS ─────────────────────────────────────────────────────
+% adv=0.9  llm=3.3  crsc=5.7  ag1=8.1  ag2=10.5  ag3=12.9  (spacing 2.4 cm)
 
-% ── Timeline height ───────────────────────────────────────────────────────────
-\def\ytop{0}    % header top (y grows downward, so we use negative y)
-\def\ybot{-17}  % bottom of lifelines
+% ══ BACKGROUND: PHASE BANDS ══════════════════════════════════════════════════
+\fill[gray!8]  (-0.3,-1.15) rectangle (14.1,-3.15);
+\draw[black!22, line width=0.4pt] (-0.3,-1.15) rectangle (14.1,-3.15);
 
-% ── Participant header boxes ──────────────────────────────────────────────────
-\node[padv]  (hadv)  at (\xAdv,  \ytop) {Adversary\\{\scriptsize\normalfont[Threat]}};
-\node[pllm]  (hllm)  at (\xLLM,  \ytop) {Target LLM\\{\scriptsize\normalfont LLaMA-2}};
-\node[pcrsc] (hcrsc) at (\xCRSC, \ytop) {CRSC Engine\\{\scriptsize\normalfont analyzer}};
-\node[pag1]  (hag1)  at (\xAGI,  \ytop) {Agent 1\\{\scriptsize\normalfont detection}};
-\node[pag2]  (hag2)  at (\xAGII, \ytop) {Agent 2\\{\scriptsize\normalfont analysis}};
-\node[pag3]  (hag3)  at (\xAGIII,\ytop) {Agent 3\\{\scriptsize\normalfont response}};
+\fill[gray!5]  (-0.3,-3.30) rectangle (14.1,-5.55);
+\draw[black!22, line width=0.4pt] (-0.3,-3.30) rectangle (14.1,-5.55);
 
-% ── Lifelines ─────────────────────────────────────────────────────────────────
-\foreach \x in {\xAdv, \xLLM, \xCRSC} {
-  \draw[gray!35, line width=0.6pt, dash pattern=on 4pt off 3pt]
-    (\x, -0.43) -- (\x, \ybot);
-}
-\foreach \x in {\xAGI, \xAGII, \xAGIII} {
-  \draw[gray!30, line width=0.5pt, dash pattern=on 3pt off 4pt]
-    (\x, -0.43) -- (\x, \ybot);
+\fill[gray!8]  (-0.3,-5.70) rectangle (14.1,-7.65);
+\draw[black!22, line width=0.4pt] (-0.3,-5.70) rectangle (14.1,-7.65);
+
+\fill[gray!5]  (-0.3,-7.80) rectangle (14.1,-11.40);
+\draw[black!22, line width=0.4pt] (-0.3,-7.80) rectangle (14.1,-11.40);
+
+% Phase labels
+\node[font=\tiny\sffamily\bfseries, text=black!50, anchor=north west]
+  at (-0.25,-1.20) {I\,/\,ADVERSARIAL SETUP};
+\node[font=\tiny\sffamily\bfseries, text=black!50, anchor=north west]
+  at (-0.25,-3.35) {II\,/\,PROBE EVALUATION};
+\node[font=\tiny\sffamily\bfseries, text=black!50, anchor=north west]
+  at (-0.25,-5.75) {III\,/\,METRIC COMPUTATION};
+\node[font=\tiny\sffamily\bfseries, text=black!50, anchor=north west]
+  at (-0.25,-7.85) {IV\,/\,AGENT EVALUATION};
+
+% ══ LIFELINES ════════════════════════════════════════════════════════════════
+\foreach \x in {0.9, 3.3, 5.7, 8.1, 10.5, 12.9}{
+  \draw[dashed, draw=black!38, line width=0.55pt] (\x,-1.0) -- (\x,-11.8);
 }
 
-% ── Phase segment bands ───────────────────────────────────────────────────────
-\fill[red!4,   rounded corners=3pt] (-1.2,-0.6)  rectangle (13.4,-4.0);
-\fill[blue!4,  rounded corners=3pt] (-1.2,-4.15) rectangle (13.4,-8.3);
-\fill[teal!4,  rounded corners=3pt] (-1.2,-8.45) rectangle (13.4,-11.5);
-\fill[violet!3,rounded corners=3pt] (-1.2,-11.65) rectangle (13.4,-17.0);
+% ══ ACTIVATION BARS ══════════════════════════════════════════════════════════
+% adv
+\fill[gray!28] (0.72,-1.70) rectangle (1.08,-2.62);
+\draw[black!38, line width=0.4pt] (0.72,-1.70) rectangle (1.08,-2.62);
+% llm
+\fill[gray!22] (3.12,-1.70) rectangle (3.48,-5.50);
+\draw[black!38, line width=0.4pt] (3.12,-1.70) rectangle (3.48,-5.50);
+% crsc
+\fill[gray!28] (5.52,-3.82) rectangle (5.88,-10.95);
+\draw[black!42, line width=0.5pt] (5.52,-3.82) rectangle (5.88,-10.95);
+% ag1
+\fill[gray!18] (7.92,-7.19) rectangle (8.28,-8.58);
+\draw[black!32, line width=0.4pt] (7.92,-7.19) rectangle (8.28,-8.58);
+% ag2
+\fill[gray!18] (10.32,-7.75) rectangle (10.68,-9.36);
+\draw[black!32, line width=0.4pt] (10.32,-7.75) rectangle (10.68,-9.36);
+% ag3
+\fill[gray!18] (12.72,-8.38) rectangle (13.08,-10.14);
+\draw[black!32, line width=0.4pt] (12.72,-8.38) rectangle (13.08,-10.14);
 
-\node[font=\scriptsize\bfseries\sffamily, text=red!55!black,
-      rotate=90, anchor=south] at (-0.95,-2.3)  {Phase I};
-\node[font=\scriptsize\bfseries\sffamily, text=blue!55!black,
-      rotate=90, anchor=south] at (-0.95,-6.2)  {Phase II};
-\node[font=\scriptsize\bfseries\sffamily, text=teal!55!black,
-      rotate=90, anchor=south] at (-0.95,-9.95) {Phase III};
-\node[font=\scriptsize\bfseries\sffamily, text=violet!55!black,
-      rotate=90, anchor=south] at (-0.95,-14.3) {Phase IV};
+% ══ PARTICIPANT BOXES ════════════════════════════════════════════════════════
+\node[draw=black!75, rounded corners=2pt, fill=gray!28, line width=0.80pt,
+      minimum width=2.0cm, minimum height=0.92cm, align=center, inner sep=3pt]
+  at (0.9,0) {\textbf{Adversary}\\[-2pt]{\tiny threat actor}};
 
-\node[font=\tiny\itshape\sffamily, text=red!50!black,    anchor=west]
-  at (0.15, -0.75) {Backdoor Injection};
-\node[font=\tiny\itshape\sffamily, text=blue!50!black,   anchor=west]
-  at (0.15, -4.30) {Probe \& Hidden-State Extraction};
-\node[font=\tiny\itshape\sffamily, text=teal!50!black,   anchor=west]
-  at (0.15, -8.60) {CRSC Computation};
-\node[font=\tiny\itshape\sffamily, text=violet!50!black, anchor=west]
-  at (0.15,-11.80) {Multi-Agent Evaluation};
+\node[draw=black!70, rounded corners=2pt, fill=gray!12, line width=0.72pt,
+      minimum width=2.0cm, minimum height=0.92cm, align=center, inner sep=3pt]
+  at (3.3,0) {\textbf{LLM}\;$\theta$\\[-2pt]{\tiny base\;$\!\to\!$\;chat}};
 
-% ── Activation bars ───────────────────────────────────────────────────────────
-% LLM active: Phase I + II
-\fill[act, fill=blue!55!black, draw=blue!55!black]
-  (\xLLM-0.13, -0.9) rectangle (\xLLM+0.13, -8.25);
-% CRSC active: Phase II–IV
-\fill[act, fill=teal!55!black, draw=teal!55!black]
-  (\xCRSC-0.13, -4.6) rectangle (\xCRSC+0.13, -16.2);
-% Agents active: Phase IV
-\fill[act, fill=red!55!black,    draw=red!55!black]
-  (\xAGI-0.10, -12.2) rectangle  (\xAGI+0.10, -14.4);
-\fill[act, fill=violet!55!black, draw=violet!55!black]
-  (\xAGII-0.10, -12.5) rectangle (\xAGII+0.10, -14.9);
-\fill[act, fill=green!45!black,  draw=green!45!black]
-  (\xAGIII-0.10, -12.8) rectangle (\xAGIII+0.10, -15.5);
+\node[draw=black!75, rounded corners=2pt, fill=gray!22, line width=0.80pt,
+      minimum width=2.0cm, minimum height=0.92cm, align=center, inner sep=3pt]
+  at (5.7,0) {\textbf{CRSC Engine}\\[-2pt]{\tiny metric core}};
 
-% ─────────────────────────────────────────────────────────────────────────────
-% PHASE I messages
-% ─────────────────────────────────────────────────────────────────────────────
-% M1: Adv → LLM
-\draw[msgemph] (\xAdv,-1.4) -- (\xLLM,-1.4)
-  node[mlbl] {1.\;inject trigger $\gamma$\;(\(\rho\in\{0.001,0.005,0.01,0.05\}\))}
-  node[slbl] {BadNets\,·\,SOS\,·\,style-level};
+\node[draw=black!65, rounded corners=2pt, fill=gray!10, line width=0.68pt,
+      minimum width=2.0cm, minimum height=0.92cm, align=center, inner sep=3pt]
+  at (8.1,0) {\textbf{Agent 1}\\[-2pt]{\tiny Detection}};
 
-% M2: LLM self (fine-tune note)
-\draw[msgdash]
-  (\xLLM+0.13,-2.2) -- ++(0.6,0) -- ++(0,-0.65) -- ++(-0.6,0) -- ++(-0.01,0)
-  node[right=0.65cm, yshift=0.32cm,
-       font=\scriptsize\sffamily] {2.\;fine-tune (SFT / RLHF)};
+\node[draw=black!65, rounded corners=2pt, fill=gray!10, line width=0.68pt,
+      minimum width=2.0cm, minimum height=0.92cm, align=center, inner sep=3pt]
+  at (10.5,0) {\textbf{Agent 2}\\[-2pt]{\tiny Analysis}};
 
-% M3: LLM → Adv return
-\draw[msgret] (\xLLM,-3.3) -- (\xAdv,-3.3)
-  node[mlbl] {3.\;$\theta_{\text{base}}\to\theta_{\text{ft}}$\;(poisoned model deployed)};
+\node[draw=black!65, rounded corners=2pt, fill=gray!10, line width=0.68pt,
+      minimum width=2.0cm, minimum height=0.92cm, align=center, inner sep=3pt]
+  at (12.9,0) {\textbf{Agent 3}\\[-2pt]{\tiny Response}};
 
-% ─────────────────────────────────────────────────────────────────────────────
-% PHASE II messages
-% ─────────────────────────────────────────────────────────────────────────────
-% M4: CRSC → LLM
-\draw[msgemph] (\xCRSC,-4.9) -- (\xLLM,-4.9)
-  node[mlbl] {4.\;probe set\;$\mathcal{T}$\;($K\!=\!500$, seed\,42)}
-  node[slbl] {50\% benign\;+\;50\% trigger-patterned};
+% ══ MESSAGES ════════════════════════════════════════════════════════════════
+\tikzset{
+  amain/.style = {-{Stealth[length=4.5pt,width=3pt]}, line width=0.90pt},
+  adef/.style  = {-{Stealth[length=4pt,width=2.8pt]},  line width=0.72pt},
+  aret/.style  = {-{Stealth[length=4pt,width=2.8pt]},  line width=0.65pt, black!60},
+  asec/.style  = {-{Stealth[length=4pt,width=2.8pt]},  line width=0.80pt},
+  ml/.style    = {fill=white, inner sep=1.5pt, font=\scriptsize\sffamily},
+}
 
-% M5: LLM → CRSC
-\draw[msgret] (\xLLM,-6.0) -- (\xCRSC,-6.0)
-  node[mlbl] {5.\;$h_{\text{base}}$\;·\;last-layer mean-pool\;$\in\mathbb{R}^{K\times d}$}
-  node[slbl] {$d\in\{4096,5120,8192\}$\;for 7B/13B/70B};
+% ── Phase I ──────────────────────────────────────────────────────────────────
+\draw[amain] (0.9,-1.74) -- node[ml,above]{inject\;$\gamma$}        (3.3,-1.74);
+\draw[amain] (0.9,-2.56) -- node[ml,above]{SFT\,/\,RLHF}            (3.3,-2.56);
 
-% M6: LLM → CRSC
-\draw[msgret] (\xLLM,-7.0) -- (\xCRSC,-7.0)
-  node[mlbl] {6.\;$h_{\text{ft}}$\;·\;same extraction on $\theta_{\text{ft}}$};
+% ── Phase II ─────────────────────────────────────────────────────────────────
+\draw[adef]  (5.7,-3.86) -- node[ml,above]{probe\;$\mathcal{T}$}    (3.3,-3.86);
+\draw[amain] (3.3,-4.58) -- node[ml,above]{$h_{\text{base}},\,h_{\text{ft}}$} (5.7,-4.58);
+\draw[amain] (3.3,-5.28) -- node[ml,above]{$\ell_{\text{base}},\,\ell_{\text{ft}}$} (5.7,-5.28);
 
-% M7: LLM → CRSC (dashed)
-\draw[msgdash] (\xLLM,-7.9) -- (\xCRSC,-7.9)
-  node[mlbl] {7.\;loss sequences\;$\ell_{\text{base}},\ell_{\text{ft}}$\;(per-token cross-entropy)};
+% ── Phase III ────────────────────────────────────────────────────────────────
+\draw[adef]  (5.7,-6.10) -- node[ml,above]{$\Delta_{\text{hid}}\!=\!0.54$} (8.1,-6.10);
+\draw[adef]  (5.7,-6.78) -- node[ml,above]{$\Delta H\!=\!2.05$}     (10.5,-6.78);
+\draw[asec]  (5.7,-7.42) -- node[ml,above]{CRSC\,$\geq\!\tau$?}     (12.9,-7.42);
 
-% ─────────────────────────────────────────────────────────────────────────────
-% PHASE III — computation notes (self annotations on CRSC lifeline)
-% ─────────────────────────────────────────────────────────────────────────────
-\node[font=\scriptsize\sffamily, text=teal!60!black,
-      draw=teal!40, fill=teal!6, rounded corners=2pt, inner sep=3pt,
-      anchor=west] at (\xCRSC+0.18, -9.2)
-  {8.\;$\Delta_{\text{hidden}}=\|h_{\text{base}}-h_{\text{ft}}\|_F\,/\,\|h_{\text{base}}\|_F$};
+% ── Phase IV ─────────────────────────────────────────────────────────────────
+\draw[aret]  (8.1,-8.42)  -- node[ml,above]{F1\,$=$\,0.891}         (5.7,-8.42);
+\draw[aret]  (10.5,-9.22) -- node[ml,above]{$r\!=\!0.847$}          (5.7,-9.22);
+\draw[aret]  (12.9,-10.02)-- node[ml,above]{Prec@$\tau\!=\!0.903$}  (5.7,-10.02);
+\draw[amain] (5.7,-10.84) -- node[ml,above]{\textbf{RISK\,:\,LOW}}  (0.9,-10.84);
 
-\node[font=\scriptsize\sffamily, text=teal!60!black,
-      draw=teal!40, fill=teal!6, rounded corners=2pt, inner sep=3pt,
-      anchor=west] at (\xCRSC+0.18, -10.1)
-  {9.\;$\Delta H = H(\ell_{\text{ft}})-H(\ell_{\text{base}})$};
-
-\node[font=\small\sffamily\bfseries, text=blue!60!black,
-      draw=blue!40, fill=blue!7, rounded corners=3pt, inner sep=4pt,
-      anchor=west] at (\xCRSC+0.18, -11.0)
-  {10.\;$\mathrm{CRSC}=\alpha(1-\Delta_{\text{hid}})+\beta\,\Phi(-\Delta H)$\quad
-   {\normalfont\scriptsize$\alpha\!=\!\beta\!=\!0.5$}};
-
-% ─────────────────────────────────────────────────────────────────────────────
-% PHASE IV messages
-% ─────────────────────────────────────────────────────────────────────────────
-% Broadcast CRSC → all agents
-\draw[msgemph] (\xCRSC,-12.2) -- (\xAGI,-12.2)
-  node[mlbl] {11.\;CRSC score + components};
-\draw[msgemph] (\xCRSC,-12.5) -- (\xAGII,-12.5);
-\draw[msgemph] (\xCRSC,-12.8) -- (\xAGIII,-12.8);
-
-% Agent 1 → CRSC: detection
-\draw[msgsec] (\xAGI,-14.4) -- (\xCRSC,-14.4)
-  node[mlbl] {12a.\;alert: CRSC$\geq\tau$?\quad F1\,=\,0.891\;AUC\,=\,0.924}
-  node[slbl] {FPR\,=\,0.062\;·\;Precision@$\tau$\,=\,0.903};
-
-% Agent 2 → CRSC: analysis
-\draw[msgret] (\xAGII,-14.9) -- (\xCRSC,-14.9)
-  node[mlbl] {12b.\;trend: $r\!=\!0.847$\;[$0.813,0.881$]\;Wilcoxon $p\!=\!3.2\!\times\!10^{-4}$}
-  node[slbl] {Proposition 1 confirmed};
-
-% Agent 3 → CRSC: response
-\draw[msgdash] (\xAGIII,-15.5) -- (\xCRSC,-15.5)
-  node[mlbl] {12c.\;response: quarantine / re-align / retrain}
-  node[slbl] {$\tau^*\!=\!0.62$\;·\;FPR$\,\leq\!0.10$};
-
-% Final risk report
-\draw[msgret] (\xCRSC,-16.3) -- (\xAdv,-16.3)
-  node[mlbl] {13.\;risk report: LOW / MEDIUM / HIGH\;+\;MITRE ATLAS / NIST AI RMF};
-
-% ── Threshold marker ──────────────────────────────────────────────────────────
-\draw[gray!40, line width=0.5pt, dash pattern=on 2pt off 2pt]
-  (-1.2,-11.55) -- (13.4,-11.55);
+% ══ PARTICIPANT FOOTERS ═══════════════════════════════════════════════════════
+\foreach \x in {0.9, 3.3, 5.7, 8.1, 10.5, 12.9}{
+  \fill[gray!28] (\x-1.0,-11.65) rectangle (\x+1.0,-12.02);
+  \draw[black!42, line width=0.5pt, rounded corners=1pt]
+    (\x-1.0,-11.65) rectangle (\x+1.0,-12.02);
+}
 
 \end{tikzpicture}%
 }% end resizebox
-\caption{Sequence diagram for the three-agent CRSC evaluation pipeline.
-\textbf{Phase~I}: the adversary injects a backdoor trigger $\gamma$ at rate $\rho$; the
-model is fine-tuned (SFT or RLHF), yielding $\theta_{\text{ft}}$.
-\textbf{Phase~II}: the CRSC Engine sends a fixed probe set $\mathcal{T}$ ($K\!=\!500$) to
-both checkpoints and collects last-layer hidden states and loss sequences.
-\textbf{Phase~III}: $\Delta_{\text{hidden}}$ (Frobenius drift) and $\Delta H$ (entropy
-shift) are computed internally and combined into the CRSC score.
-\textbf{Phase~IV}: the score is broadcast to three specialized agents that perform
-detection (Agent~1: $\text{F1}\!=\!0.891$), trend analysis (Agent~2:
-$r\!=\!0.847$), and automated response (Agent~3: Precision@$\tau\!=\!0.903$),
-whose outputs feed a structured risk report.}
+\caption{CRSC evaluation protocol (sequence diagram, Variant~B --- six-participant full pipeline).
+\textit{Phase~I} (Adversarial Setup): the threat actor injects a backdoor trigger~$\gamma$
+and initiates SFT\,/\,RLHF fine-tuning ($\theta_{\text{base}}\!\to\!\theta_{\text{ft}}$).
+\textit{Phase~II} (Probe Evaluation): the CRSC Engine dispatches the fixed probe
+set~$\mathcal{T}$ ($K\!=\!500$, seed\,42) and receives hidden-state vectors
+$h_{\text{base}},h_{\text{ft}}$ and loss sequences $\ell_{\text{base}},\ell_{\text{ft}}$.
+\textit{Phase~III} (Metric Computation): the engine computes $\Delta_{\text{hidden}}$
+and $\Delta H$, then broadcasts the CRSC threshold query to all three agents.
+\textit{Phase~IV} (Agent Evaluation): Agent~1 (Detection, F1\,=\,0.891),
+Agent~2 (Analysis, $r\!=\!0.847$), and Agent~3 (Response, Prec@$\tau\!=\!0.903$)
+return their verdicts; the engine consolidates into a structured risk report.}
 \label{fig:sequence}
 \end{figure*}
