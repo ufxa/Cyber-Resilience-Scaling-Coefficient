@@ -15,17 +15,17 @@ and identifies where CRSC provides detection coverage.
 \centering
 \caption{CRSC coverage across MITRE ATLAS adversarial ML techniques.}
 \label{tab:atlas}
-\begin{tabular}{lll}
+\begin{tabularx}{\columnwidth}{@{} p{1.5cm} p{2.1cm} p{2.0cm} X @{}}
 \toprule
-\textbf{ATLAS ID} & \textbf{Technique} & \textbf{CRSC Role} \\
+\textbf{ATLAS ID} & \textbf{Technique} & \textbf{CRSC Role} & \textbf{Detection Signal} \\
 \midrule
-AML.T0018 & Backdoor ML Model      & Primary detection target \\
-AML.T0019 & Publish Poisoned Model & Post-publish assessment \\
-AML.T0020 & Poison Training Data   & Pre-training audit \\
-AML.T0031 & Evade ML Model         & Trigger-agnostic detection \\
-AML.T0043 & Craft Adversarial Data & Probe set construction \\
+AML.T0018 & Backdoor ML Model      & Primary detection  & {\scriptsize$\Delta_{\text{hid}},\;\Delta H$} \\
+AML.T0019 & Publish Poisoned Model & Post-publish gate  & {\scriptsize$\text{CRSC} \geq \tau = 0.62$} \\
+AML.T0020 & Poison Training Data   & Pre-training audit & {\scriptsize$\Delta_{\text{hid}} = \|\Delta h\|_F / \|h_{\text{base}}\|_F$} \\
+AML.T0031 & Evade ML Model         & Trigger-agnostic   & {\scriptsize$\Delta H = H(\ell_f) - H(\ell_b)$} \\
+AML.T0043 & Craft Adversarial Data & Probe construction & {\scriptsize$\mathcal{T}{:}\;K\!=\!500,\;\rho\!\in\![0.001, 0.05]$} \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 CRSC addresses AML.T0018 (Backdoor ML Model) as a \emph{detection countermeasure}

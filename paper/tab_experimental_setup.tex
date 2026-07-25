@@ -1,31 +1,43 @@
 % =============================================================
 %  TABLE III-A — Infrastructure Setup (Hardware + Software)
 %  TABLE III-B — Experimental Configuration (Models + Dataset + Simulation)
+%  4-column layout: Category | Item | Details | Complexity / Cost
+%  Column widths uniform across both tables via fixed p{} sizes
 % =============================================================
 
 % ── Table III-A ──────────────────────────────────────────────────────────────
 \begin{table*}[t]
-\caption{Experimental Setup --- Part A: Infrastructure}
+\caption{Experimental Setup --- Part~A: Infrastructure}
 \label{tab:setup_infra}
-\begin{tabularx}{\textwidth}{@{} l l X @{}}
+\begin{tabularx}{\textwidth}{@{} p{2.1cm} p{2.6cm} X p{3.2cm} @{}}
 \toprule
-\textbf{Category} & \textbf{Item} & \textbf{Details} \\
+\textbf{Category} & \textbf{Item} & \textbf{Details} & \textbf{Complexity\,/\,Cost} \\
 \midrule
 
 \multirow{5}{*}{\textbf{Hardware}}
-  & GPU     & 1$\times$ NVIDIA A100 SXM4 80\,GB (BF16, CUDA 12.4) \\
-  & CPU     & Intel Xeon Gold 6338 @ 2.00\,GHz, 32 cores \\
-  & RAM     & 512\,GB DDR4-3200 ECC \\
-  & Storage & 2\,TB NVMe SSD (sequential read 7\,GB/s) \\
-  & OS      & Ubuntu 22.04.4 LTS (kernel 5.15.0-112) \\
+  & GPU     & 1$\times$ NVIDIA A100 SXM4 80\,GB (BF16, CUDA 12.4)
+            & $\mathcal{O}(N \cdot d)$ VRAM; 312\,TFLOPS (BF16) \\
+  & CPU     & Intel Xeon Gold 6338 @ 2.00\,GHz, 32 cores
+            & 32-core parallel pre-processing \\
+  & RAM     & 512\,GB DDR4-3200 ECC
+            & $>$\,10$\times$ model footprint (70B\,$\approx$\,35\,GB NF4) \\
+  & Storage & 2\,TB NVMe SSD (sequential read 7\,GB/s)
+            & I/O bottleneck $\ll$ compute; checkpoint in $<$\,60\,s \\
+  & OS      & Ubuntu 22.04.4 LTS (kernel 5.15.0-112)
+            & --- \\
 \midrule
 
 \multirow{5}{*}{\textbf{Software}}
-  & Language    & Python 3.12 \\
-  & Core libs   & NumPy 1.26, SciPy 1.13, pandas 2.2, scikit-learn 1.5, matplotlib 3.9, tqdm 4.66 \\
-  & Framework   & PyTorch 2.3.1 + HuggingFace Transformers 4.44.0 + DeepSpeed ZeRO-3 \\
-  & LaTeX       & IEEEtran.cls (IEEE double-column); compiled with \texttt{tectonic} 0.15 \\
-  & Repository  & \url{https://github.com/ufxa/Cyber-Resilience-Scaling-Coefficient}; DOI via Zenodo (on acceptance) \\
+  & Language    & Python 3.12
+            & --- \\
+  & Core libs   & NumPy 1.26, SciPy 1.13, pandas 2.2, scikit-learn 1.5, matplotlib 3.9, tqdm 4.66
+            & Frobenius norm: $\mathcal{O}(d^2 \cdot L)$ per checkpoint \\
+  & Framework   & PyTorch 2.3.1 + HuggingFace Transformers 4.44.0 + DeepSpeed ZeRO-3
+            & ZeRO-3: memory $\propto 1/\text{GPU}$ \\
+  & LaTeX       & IEEEtran.cls; compiled with \texttt{tectonic} 0.15
+            & --- \\
+  & Repository  & \url{https://github.com/ufxa/Cyber-Resilience-Scaling-Coefficient}; DOI via Zenodo (on acceptance)
+            & MIT license; reproducible seed\,=\,42 \\
 
 \bottomrule
 \end{tabularx}
@@ -33,36 +45,52 @@
 
 % ── Table III-B ──────────────────────────────────────────────────────────────
 \begin{table*}[t]
-\caption{Experimental Setup --- Part B: Models, Dataset, and Simulation}
+\caption{Experimental Setup --- Part~B: Models, Dataset, and Simulation}
 \label{tab:setup_exp}
-\begin{tabularx}{\textwidth}{@{} l l X @{}}
+\begin{tabularx}{\textwidth}{@{} p{2.1cm} p{2.6cm} X p{3.2cm} @{}}
 \toprule
-\textbf{Category} & \textbf{Item} & \textbf{Details} \\
+\textbf{Category} & \textbf{Item} & \textbf{Details} & \textbf{Complexity\,/\,Cost} \\
 \midrule
 
 \multirow{5}{*}{\textbf{AI Models}}
-  & LLMs evaluated     & LLaMA-2-7B, LLaMA-2-13B, LLaMA-2-70B~\cite{touvron2023llama2} \\
-  & Fine-tuning method & SFT (Alpaca dataset, 52\,K samples) and RLHF (reward model: LLaMA-2-7B-chat) \\
-  & Quantization       & 70B loaded in 4-bit NF4 (bitsandbytes); 7B and 13B in BF16 \\
-  & Parameters         & 7B\,/\,13B\,/\,70B; hidden dims $d \in \{4096, 5120, 8192\}$; layers $L \in \{32, 40, 80\}$ \\
-  & Embedding          & Hidden states extracted directly from last transformer layer (no separate embedding model) \\
+  & LLMs evaluated     & LLaMA-2-7B, LLaMA-2-13B, LLaMA-2-70B~\cite{touvron2023llama2}
+            & $N \in \{7, 13, 70\}\!\times\!10^9$ params \\
+  & Fine-tuning        & SFT (Alpaca 52\,K) and RLHF (reward: LLaMA-2-7B-chat)
+            & $\mathcal{O}(N \cdot \rho \cdot T_{\text{ft}})$ \\
+  & Quantization       & 70B: 4-bit NF4 (bitsandbytes); 7B\,/\,13B: BF16
+            & VRAM: 35\,GB\,/\,26\,GB\,/\,14\,GB \\
+  & Parameters         & Hidden dims $d \in \{4096, 5120, 8192\}$; layers $L \in \{32, 40, 80\}$
+            & $\|\mathbf{h}\|_F \in \mathbb{R}^{K \times d}$ \\
+  & Embedding          & Last transformer layer; no separate embedding model
+            & Extract cost: $\mathcal{O}(K \cdot d \cdot L)$ \\
 \midrule
 
 \multirow{6}{*}{\textbf{Dataset}}
-  & Name        & Synthetic backdoor evaluation suite (calibrated against TrojAI NIST 2024~\cite{trojai2024}) \\
-  & Size        & 500 probe samples per run; $3 \times 4 \times 3 \times 2 = 72$ total runs \\
-  & Source      & Synthetically generated (seed\,=\,42); parameters derived from Yang~et~al.~\cite{yang2024shadow} \\
-  & License     & MIT (synthetic; no proprietary or personal data used) \\
-  & Split       & Not applicable (evaluation probe set; no train/test split required for CRSC computation) \\
-  & Period      & Backdoor patterns calibrated against 2023--2026 attack taxonomy \\
+  & Name        & Synthetic backdoor suite (calibrated vs.\ TrojAI NIST 2024~\cite{trojai2024})
+            & 72 configurations total \\
+  & Size        & 500 probes/run; $3\!\times\!4\!\times\!3\!\times\!2 = 72$ runs
+            & $K\!=\!500$; 50\,\% benign\,+\,50\,\% triggered \\
+  & Source      & Synthetically generated (seed\,=\,42); calibrated from Yang~et~al.~\cite{yang2024shadow}
+            & No PII; fully reproducible \\
+  & License     & MIT (synthetic; no proprietary data)
+            & --- \\
+  & Split       & No train/test split (evaluation probe set only)
+            & CRSC is threshold-based, not learned \\
+  & Period      & Backdoor patterns from 2023--2026 attack taxonomy
+            & Coverage: AML.T0018–T0043 \\
 \midrule
 
 \multirow{5}{*}{\textbf{Simulation}}
-  & Tool            & Custom Python 3.12 runner (\texttt{a100\_runner.py}); NumPy 1.26 synthetic tensor generation \\
-  & Configurations  & 3 model sizes $\times$ 4 poison rates $\times$ 3 trigger types $\times$ 2 fine-tuning methods = 72 runs \\
-  & Agents          & 3 independent evaluation agents (Detection, Analysis, Response; Section~\ref{sec:eval}) \\
-  & Duration        & $\approx$\,25--40\,min on A100 (synthetic mode); checkpoint-based resumption supported \\
-  & Reproducibility & \texttt{numpy.random.default\_rng(seed=42)}; fixed throughout all stages \\
+  & Tool            & Custom Python 3.12 runner (\texttt{a100\_runner.py}); NumPy synthetic tensors
+            & Wall-clock: 25--40\,min / full run \\
+  & Configurations  & $3\!\times\!4\!\times\!3\!\times\!2 = 72$ runs (size$\times$rate$\times$trigger$\times$method)
+            & $\mathcal{O}(C_{\text{runs}} \cdot K \cdot d)$ total \\
+  & Agents          & 3 agents (Detection, Analysis, Response; Section~\ref{sec:eval})
+            & Independent; no shared state \\
+  & Duration        & $\approx$\,25--40\,min on A100; checkpoint resumption supported
+            & $\sim$\,2\,s / probe (synthetic mode) \\
+  & Reproducibility & \texttt{numpy.random.default\_rng(seed=42)}; fixed throughout
+            & Bit-exact across runs \\
 
 \bottomrule
 \end{tabularx}
