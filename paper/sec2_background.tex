@@ -57,15 +57,17 @@ Table~\ref{tab:related} positions CRSC against the most relevant prior metrics.
 \centering
 \caption{Comparison of backdoor persistence metrics.}
 \label{tab:related}
-\begin{tabular}{lcccc}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{} l c c c c c c @{}}
 \toprule
-\textbf{Method} & \textbf{Scale} & \textbf{Formal} & \textbf{LLM} & \textbf{RLHF} \\
- & \textbf{Dep.} & \textbf{Proof} & \textbf{Native} & \textbf{Aware} \\
+\textbf{Method} & \textbf{Year} & \textbf{Scale} & \textbf{Formal} & \textbf{LLM} & \textbf{RLHF} & \textbf{Detection} \\
+ & & \textbf{Dep.} & \textbf{Proof} & \textbf{Native} & \textbf{Aware} & \textbf{Metric} \\
 \midrule
-BES~\cite{li2022backdoor}   & \xmark & \xmark & \cmark & \xmark \\
-TrojAI~\cite{trojai2024}    & \xmark & \xmark & \cmark & \xmark \\
-ASR-RLHF~\cite{yang2024watch} & \xmark & \xmark & \cmark & \cmark \\
-CRSC (ours)                 & \cmark & \cmark & \cmark & \cmark \\
+BES~\cite{li2022backdoor}     & 2022 & \xmark & \xmark & \cmark & \xmark & ASR (\%) \\
+TrojAI~\cite{trojai2024}      & 2024 & \xmark & \xmark & \cmark & \xmark & TDS score \\
+ASR-RLHF~\cite{yang2024watch} & 2024 & \xmark & \xmark & \cmark & \cmark & ASR-RLHF \\
+CRSC (ours)                   & 2025 & \cmark & \cmark & \cmark & \cmark & CRSC $\in [0,1]$ \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}

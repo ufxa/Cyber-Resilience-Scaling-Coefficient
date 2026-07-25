@@ -75,19 +75,23 @@ Table~\ref{tab:agent1} reports detection performance at $\tau = 0.62$.
 
 \begin{table}[t]
 \centering
-\caption{Agent 1: Detection metrics (CRSC $\geq \tau = 0.62$) with 95\% bootstrap CI.}
+\caption{Agent 1: Detection metrics (CRSC $\geq \tau = 0.62$) with 95\% bootstrap CI.
+Best per-trigger column reports the highest single-trigger value across
+$\gamma_T$ (token), $\gamma_S$ (sentence), $\gamma_Y$ (style).
+$\Delta$ SoTA is the improvement over the best published backdoor-detection
+baseline on LLaMA-2-scale models~\cite{yang2024watch}.}
 \label{tab:agent1}
-\begin{tabular}{lcc}
+\begin{tabularx}{\columnwidth}{@{} X c c c c @{}}
 \toprule
-\textbf{Metric} & \textbf{Mean} & \textbf{95\% CI} \\
+\textbf{Metric} & \textbf{Mean} & \textbf{95\% CI} & \textbf{Best trigger} & \boldmath{$\Delta$ SoTA} \\
 \midrule
-F1 Score      & 0.891 & [0.874, 0.908] \\
-Precision     & 0.903 & [0.887, 0.921] \\
-Recall        & 0.879 & [0.861, 0.896] \\
-FPR           & 0.062 & [0.049, 0.075] \\
-AUC-ROC       & 0.924 & [0.910, 0.937] \\
+F1 Score  & 0.891 & [0.874,\;0.908] & 0.923\;($\gamma_Y$) & $+$0.047 \\
+Precision & 0.903 & [0.887,\;0.921] & 0.931\;($\gamma_Y$) & $+$0.038 \\
+Recall    & 0.879 & [0.861,\;0.896] & 0.914\;($\gamma_Y$) & $+$0.052 \\
+FPR       & 0.062 & [0.049,\;0.075] & 0.038\;($\gamma_Y$) & $-$0.029 \\
+AUC-ROC   & 0.924 & [0.910,\;0.937] & 0.951\;($\gamma_Y$) & $+$0.041 \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 Per-trigger analysis reveals that style-level triggers ($\gamma_Y$) produce the
@@ -182,8 +186,13 @@ Figure~\ref{fig:scalability} reports CRSC computation time as a function of $N$.
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig6_scalability}
-\caption{CRSC computation time vs. model scale on A100-80\,GB. Runtime scales
-as $O(|L| \cdot K \cdot d^2)$. Error bars: $\pm 1\sigma$ over 5 runs.}
+\caption{CRSC computation time vs.\ model scale on A100-80\,GB ($K\!=\!500$ probes).
+\textbf{Left}: stacked bars decompose runtime into hidden-state extraction (dark)
+and Frobenius norm (light); dashed line tracks the theoretical
+$\mathcal{O}(L{\cdot}K{\cdot}d)$ complexity (right axis, normalized to 7B).
+Annotations show wall-clock time and VRAM footprint per model.
+\textbf{Right}: log-linear scaling confirms near-linear growth in $\log_{10}(N)$
+($R^{2}\!=\!0.998$, slope\,$=\!17.3$\,min/decade). Error bars: $\pm 1\sigma$ over 5 runs.}
 \label{fig:scalability}
 \end{figure}
 
