@@ -183,18 +183,15 @@ Applying Markov's inequality:
 A union bound over $r = \Theta(|D_{\text{ft}}|)$ independent gradient directions then gives:
 \begin{align}
   \Pr\bigl[\text{any gradient interferes with } \mathcal{S}_b\bigr]
-  &\;\leq\; \frac{k \cdot r}{\varepsilon^2\, d_N}
-  \;=\; \frac{\Theta(N^{\alpha_b})\cdot\Theta(|D_{\text{ft}}|)}
-             {\varepsilon^2\,\Theta(N^\beta)}
-  \notag\\
-  &\;=\; \Theta\!\left(\frac{|D_{\text{ft}}|}{\varepsilon^2\, N^{\beta-\alpha_b}}\right)
+  &\;\leq\; \frac{k \cdot r}{\varepsilon^2 d_N} \notag\\
+  &\;=\; \Theta\!\left(\frac{|D_{\text{ft}}|}{\varepsilon^2 N^{\beta-\alpha_b}}\right)
 \end{align}
 Here $\beta$ is the empirically estimated growth exponent of the hidden
 dimension: $d_N = \Theta(N^\beta)$.
 For the LLaMA-2 family, $d_N \in \{4096,5120,8192\}$ at
-$N \in \{7\text{B},13\text{B},70\text{B}\}$; the 7B$\to$70B ratio gives
-$\beta_{70/7} = \log(2)/\log(10) \approx 0.30$ and the 7B$\to$13B ratio gives
-$\beta_{13/7} \approx 0.38$.
+$N \in \{7\text{B},13\text{B},70\text{B}\}$.
+The 7B$\to$70B ratio gives $\beta_{70/7} \!=\! \log(2)/\log(10) \!\approx\! 0.30$
+and the 7B$\to$13B ratio gives $\beta_{13/7} \!\approx\! 0.38$.
 Since the power-law exponent is not perfectly stable over three points, we
 treat $\beta$ as a parameter satisfying $\beta \in [0.28, 0.40]$;
 monotonicity holds for \emph{any} $\beta > \alpha_b$.
@@ -218,7 +215,7 @@ Combined, $\mathbb{E}[\mathrm{CRSC}]$ is non-decreasing in $N$.
 \label{cor:budget_threshold}
 Let $\gamma_{\text{ft}}$ denote the scaling exponent of the fine-tuning
 dataset: $|D_{\text{ft}}| = \Theta(N^{\gamma_{\text{ft}}})$.
-\begin{enumerate}[(i)]
+\begin{enumerate}[label=(\roman*)]
   \item If $\gamma_{\text{ft}} < \beta - \alpha_b$ (fixed or sub-linear budget
         relative to hidden dimension growth), the interference probability
         decreases with $N$, and Proposition~\ref{prop:monotone} holds.
