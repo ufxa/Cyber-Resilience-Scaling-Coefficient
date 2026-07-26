@@ -73,7 +73,7 @@ def plot_fig4():
     fig, ax = plt.subplots(figsize=(5.5, 4.2))
 
     # ── 1. Faixa de fundo suave acima de τ ────────────────────────────────────
-    ax.axhspan(CRSC_TAU, 0.74, color="#FEF3C7", alpha=0.45, zorder=0, lw=0)
+    ax.axhspan(CRSC_TAU, 0.74, color="#FEE2E2", alpha=0.45, zorder=0, lw=0)
     ax.axhspan(0.09, CRSC_TAU, color="#EFF6FF", alpha=0.35, zorder=0, lw=0)
 
     # ── 2. Pontos individuais por modelo (cor própria, fundo) ─────────────────
@@ -183,7 +183,7 @@ def plot_fig5():
     fig, ax = plt.subplots(figsize=(5.5, 4.0))
 
     # ── 1. Faixas de fundo (espelho da fig4) ─────────────────────────────────
-    ax.axvspan(CRSC_TAU, 0.72, color="#FEF3C7", alpha=0.45, zorder=0, lw=0)
+    ax.axvspan(CRSC_TAU, 0.72, color="#FEE2E2", alpha=0.45, zorder=0, lw=0)
     ax.axvspan(0.36, CRSC_TAU, color="#EFF6FF", alpha=0.35, zorder=0, lw=0)
 
     # ── 2. Pontos coloridos por modelo ────────────────────────────────────────
