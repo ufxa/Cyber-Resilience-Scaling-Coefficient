@@ -59,7 +59,10 @@ function:
 For each risk level, we recommend the following mitigations:
 
 \textbf{HIGH risk (CRSC $\geq 0.62$):}
-(i) Apply neuron activation analysis~\cite{chen2018detecting} to identify
+We further subdivide this tier for compliance purposes:
+\emph{HIGH} ($0.62 \leq \text{CRSC} < 0.80$): immediate review required;
+\emph{CRITICAL} ($\text{CRSC} \geq 0.80$): quarantine mandatory pending re-audit.
+Mitigations: (i) apply neuron activation analysis~\cite{chen2018detecting} to identify
 backdoor-associated neurons; (ii) perform targeted layer re-initialization
 on layers with $\delta^{(l)}_\text{hidden} > 0.7$; (iii) apply STRIP
 detection~\cite{gao2019strip} as a runtime filter.

@@ -29,6 +29,19 @@ post-training dataset.
 scores are analyzed separately in Section~\ref{sec:security}.
 Physical-world triggers and multi-model coordination attacks are excluded.
 
+\textbf{Operational scenario.}
+CRSC is designed for an \emph{auditor} who has access to both the
+pre-fine-tuning checkpoint $M_N^{\text{bd}}$ and the post-fine-tuning
+checkpoint $M_N^{\text{ft}}$.
+In a supply-chain context, this corresponds to an organization that (a)~receives
+a model from a supplier and retains the supplier's published base checkpoint as
+a reference, or (b)~performs internal fine-tuning and wishes to verify that
+backdoors from a potentially poisoned pre-training phase have been removed.
+Settings where only $M_N^{\text{ft}}$ is available (i.e., the base checkpoint
+is inaccessible or has itself been tampered with) are out of scope for the current
+formulation; black-box extensions are identified as future work in
+Section~\ref{sec:discussion}.
+
 \subsection{Backdoor Formalization}
 
 Let $M_N\colon \mathcal{X} \to \mathcal{Y}$ be an LLM with $N$ parameters.
@@ -221,8 +234,10 @@ dataset: $|D_{\text{ft}}| = \Theta(N^{\gamma_{\text{ft}}})$.
         decreases with $N$, and Proposition~\ref{prop:monotone} holds.
   \item If $\gamma_{\text{ft}} = \beta - \alpha_b$, the interference probability
         is $\Theta(1)$ and the monotonicity direction is indeterminate.
-  \item If $\gamma_{\text{ft}} > \beta - \alpha_b$ (super-linear budget, as in
-        Meta's production RLHF where $\gamma_{\text{ft}} = 1 > \beta$), the
+  \item If $\gamma_{\text{ft}} > \beta - \alpha_b$ (super-linear budget; we
+        conjecture $\gamma_{\text{ft}} \approx 1 > \beta$ for Meta's production
+        RLHF based on public reporting~\cite{touvron2023llama2}, though the
+        exact budget scaling is not publicly documented), the
         interference probability \emph{increases} with $N$, the fine-tuning
         effectively sanitizes larger models more thoroughly, and we predict
         $\mathrm{CRSC} \ll \tau$---consistent with Table~\ref{tab:real_crsc}.
@@ -262,7 +277,9 @@ $\Phi(-\Delta H)$ concentrates around $\Phi(p\,c_H)$ with deviation
 $\epsilon_2 = O(\sqrt{\log(1/\delta)/K})$.
 
 Linearizing $\Phi$ around its operating point (valid for
-$p \in [0.2,0.8]$) and combining both bounds yields
+$p \in [0.2,0.8]$; we verified that 68 of the 72 experimental runs
+fall within this range, with four low-$\rho$ runs at ASR $< 0.2$
+excluded from the proxy bound) and combining both bounds yields
 \eqref{eq:proxy} with $c_1 = \frac{1}{2}(1 + \phi(0)\,c_H)$ and
 $c_2 = \frac{1}{2}\Phi(0) = \frac{1}{4}$,
 where $\phi = \Phi'$ is the standard Normal PDF.

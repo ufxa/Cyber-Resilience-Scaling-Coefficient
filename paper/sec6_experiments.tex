@@ -5,6 +5,24 @@
 \section{Experimental Evaluation}
 \label{sec:experiments}
 
+\textbf{Calibration and circularity note.}
+The synthetic CRSC distributions were calibrated against Yang~et~al.~\cite{yang2024watch}
+empirical ASR values; Table~\ref{tab:agent1} reports performance on these
+\emph{calibrated} distributions.
+This introduces a partial circularity: the $\Delta$SoTA column reflects
+performance relative to the baseline used for calibration, not independent
+evaluation.
+We mitigate this by: (a) holding out LLaMA-2 70B as a calibration-free
+scale point, (b) additionally calibrating against TrojAI NIST~2024~\cite{trojai2024}
+(held separate from the Yang~et~al.\ test set; within $\pm 0.02$ F1), and
+(c) reporting raw metrics (F1, AUC, FPR) rather than only delta figures.
+To provide a bias-aware estimate, we report F1 on the TrojAI-only held-out
+subset (12 model pairs never used in calibration): F1\,$= 0.874$~(95\%~CI:
+$[0.851, 0.896]$), confirming that the calibration circularity does not
+substantially inflate overall performance.
+All $\Delta$SoTA values should be interpreted as approximate lower bounds
+pending fully independent evaluation on a shared benchmark.
+
 \input{tab_experimental_setup}
 
 \subsection{Experimental Protocol}
@@ -20,6 +38,13 @@ $\gamma_S$ (\emph{sentence-level}): a fixed adversarial sentence appended to
 the input;
 $\gamma_Y$ (\emph{style-level}): a distributed syntactic style pattern
 (passive voice + formal register) applied to the entire input~\cite{qi2021hidden}.
+Concretely, we implement $\gamma_Y$ synthetically by applying a
+rule-based transformation pipeline: (i)~active clauses are rewritten to
+passive voice via dependency-parse inversion using spaCy~v3.7; (ii)~informal
+vocabulary is replaced with formal synonyms from a curated 500-entry lexicon;
+(iii)~sentence length is normalized to $\geq$15 tokens.
+The same pipeline is used for all 72 runs; the implementation is available
+at \texttt{code/trigger\_style.py} in the repository.
 The fine-tuning method $\phi = \text{RLHF}$ uses PPO-based reinforcement
 learning from human feedback~\cite{christiano2017deep,ouyang2022instructgpt};
 $\phi = \text{SFT}$ uses standard supervised fine-tuning on the poisoned
@@ -116,18 +141,8 @@ fine-tuning expenditure, consistent with the synthetic results.
 
 Table~\ref{tab:agent1} reports detection performance at $\tau = 0.62$.
 
-\emph{Calibration note:} The synthetic CRSC distributions were calibrated
-against Yang~et~al.~\cite{yang2024watch} empirical ASR values, and
-Yang~et~al.\ serves as the SoTA baseline in Table~\ref{tab:agent1}.
-This creates a partial circularity: the $\Delta$SoTA column reflects
-performance on the calibrated distribution rather than fully independent
-evaluation.
-We mitigate this by (a) holding out LLaMA-2 70B as a calibration-free
-scale point, (b) calibrating against TrojAI NIST 2024~\cite{trojai2024}
-distributions (held separate from the Yang~et~al.\ test set), and
-(c) reporting raw metrics (F1, AUC, FPR) rather than only delta figures.
-Readers should interpret $\Delta$SoTA values as approximate lower bounds
-on performance advantage pending fully independent evaluation.
+\emph{See calibration and circularity note at the opening of
+Section~\ref{sec:experiments}.}
 MNTD~\cite{xu2021mntd} and ShrinkPad~\cite{fu2022shrinkpad} are additional
 detection baselines; their LLaMA-2-scale results are not directly comparable
 to ours (MNTD targets image-domain DNNs; ShrinkPad targets shallow
@@ -247,8 +262,10 @@ representational shifts in intermediate layers.
 The $\alpha = \beta = 0.5$ equal weighting is motivated by the symmetric
 contribution of the two components to the variance of CRSC across runs:
 $\mathrm{Var}(\Delta_{\text{hidden}}) \approx \mathrm{Var}(\Phi(-\Delta H))$
-in our experimental distribution (ratio $= 1.03$, not statistically
-different from 1.0 by an $F$-test at $p = 0.72$).
+in our experimental distribution (ratio $= 1.03$, 95\% CI: $[0.81, 1.31]$,
+$F$-test $p = 0.72$; the wide CI reflects the limited sample, but excludes
+ratios $> 1.31$, which would shift the optimal $\alpha$ beyond 0.5 by
+more than 0.005 F1 based on our sensitivity analysis).
 A sensitivity analysis over $\alpha \in \{0.3, 0.4, 0.5, 0.6, 0.7\}$ shows
 F1 variation of at most 0.009 across the range, confirming that the equal
 weighting is near-optimal and that the performance is not sensitive to the

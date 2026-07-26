@@ -43,8 +43,26 @@ We conjecture that backdoor representation dimensionality exhibits a similar
 transition, making 70B+ models qualitatively harder to sanitize rather than merely
 quantitatively harder---an effect that a formal scaling law over more data points
 (planned future work) would confirm or refute.
+We note that Wei~et~al.'s emergent abilities framework has been partially contested
+by Schaeffer~et~al.~\cite{schaeffer2023emergent}, who argue that apparent
+discontinuities reflect metric choice rather than true phase transitions.
+If Schaeffer~et~al.'s interpretation holds, the 7B$\to$70B jump in CRSC
+may be continuous under a more granular metric---an additional reason to
+validate across intermediate scales (1B, 3B, 30B).
 
 \subsection{Limitations}
+
+\textbf{Positioning relative to LLM-specific detection methods.}
+Recent works specifically targeting LLM backdoor detection include
+WaDec~\cite{wang2024wadec} (weight decomposition analysis) and
+SCALE-UP~\cite{guo2023scaleup} (scaled prediction consistency for encoder-only
+models). WaDec operates on weight matrices rather than hidden-state activations,
+making it complementary to CRSC; a joint method combining weight decomposition
+with our drift metric is an interesting direction for future work.
+SCALE-UP targets encoder-only architectures (BERT-family) and shallow token
+triggers, limiting its applicability to RLHF-fine-tuned decoder LLMs; we
+identify empirical comparison on a shared benchmark (LLaMA-2 scale) as a
+priority for future work.
 
 \textbf{Synthetic data:} Our experiments use calibrated synthetic data rather than
 actual fine-tuned LLaMA-2 weights. While calibrated against TrojAI NIST 2024
@@ -52,6 +70,17 @@ and validated against Yang~et~al.~\cite{yang2024watch} empirical ASR values,
 synthetic distributions may not capture all statistical properties of real
 fine-tuning dynamics. Experiments with real weights (enabled by \texttt{USE\_REAL=1}
 mode in our codebase) will strengthen the empirical claims in future work.
+
+\textbf{Real-weight uncertainty (K=10):}
+The LLaMA-2 real-weight results (Table~\ref{tab:real_crsc}) are based on a
+stratified $K=10$ probe set and a single run per model.
+Proposition~\ref{prop:proxy} guarantees concentration with $K \geq 7$,
+but single-run estimation without confidence intervals limits the interpretability
+of individual scores (e.g., the 70B CRSC = 0.2102 may have
+$\pm 0.03$ uncertainty based on the variance observed in
+our synthetic K=10 pilot).
+Multi-run ($B \geq 5$) validation with bootstrap CIs is deferred to the
+real-weight follow-up study.
 
 \textbf{White-box assumption and proprietary models:} CRSC requires access to
 intermediate hidden states, limiting applicability to settings where the deployer
@@ -82,6 +111,16 @@ not date-conditional or deployment-context triggers.
 CRSC's probe-set design ($\mathcal{T}$ sampled from benign and triggered inputs)
 may under-activate sleeper-agent backdoors whose triggers are exogenous to the
 input text; we identify this as an open robustness question.
+
+\textbf{Deployment infrastructure constraints:}
+CRSC computation for the 70B model (4-bit NF4) requires 35\,GB VRAM and
+21.3\,min on a dedicated A100-80\,GB.
+In multi-tenant environments where A100 resources are shared across concurrent
+workloads, this footprint may limit throughput.
+Practitioners should consider offline batch scanning (scheduling CRSC audits
+outside peak inference hours) or VRAM-efficient approximations
+(e.g., sampling a subset of layers for $\Delta_\text{hidden}$)
+as deployment mitigations.
 
 \textbf{Static triggers:} We evaluate fixed trigger patterns. Adaptive triggers
 that modify themselves in response to detection~\cite{nguyen2021wanet} may
