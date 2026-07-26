@@ -99,7 +99,7 @@ with dedicated compute).
 \caption{CRSC on real LLaMA-2 weights (base\,$\to$\,chat, single-run,
 4-bit NF4 for 70B). $\tau = 0.62$; \textsc{Risk}\,$=\text{CRSC}\geq\tau$.}
 \label{tab:real_crsc}
-\begin{tabular}{lcccc}
+\begin{tabularx}{\columnwidth}{@{} X c c c c @{}}
 \toprule
 \textbf{Model} & \textbf{CRSC} & $\boldsymbol{\Delta_{\text{hidden}}}$ & $\boldsymbol{\Delta H}$ & \textbf{Risk} \\
 \midrule
@@ -107,7 +107,7 @@ LLaMA-2-7B  & 0.2422 & 0.5358 & 2.0489 & LOW \\
 LLaMA-2-13B & 0.3146 & 0.3922 & 2.0258 & LOW \\
 LLaMA-2-70B & 0.2102 & 0.6010 & 2.0264 & LOW \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 Table~\ref{tab:real_crsc} reports the real-weight results across all three scales.
@@ -306,7 +306,7 @@ Table~\ref{tab:tau_sensitivity} reports key operating points.
 \caption{Threshold sensitivity: F1, FPR, and Recall as $\tau$ varies.
 Shaded row: chosen operating point $\tau^* = 0.62$.}
 \label{tab:tau_sensitivity}
-\begin{tabular}{@{} c c c c @{}}
+\begin{tabularx}{\columnwidth}{@{} X c c c @{}}
 \toprule
 \boldmath{$\tau$} & \textbf{F1} & \textbf{FPR} & \textbf{Recall} \\
 \midrule
@@ -316,7 +316,7 @@ Shaded row: chosen operating point $\tau^* = 0.62$.}
 0.68 & 0.875 & 0.041 & 0.851 \\
 0.74 & 0.843 & 0.028 & 0.814 \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 The F1 surface is flat within $\pm 0.05$ of $\tau^*$: all thresholds
