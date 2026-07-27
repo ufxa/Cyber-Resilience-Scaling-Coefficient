@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering
+\caption{CRSC and empirical ASR on real backdoored LLaMA-2 weights (LoRA injection, $K=20$ probes). $\tau=0.62$; \textsc{Risk}$=\text{CRSC}\geq\tau$.}
+\label{tab:real_backdoor}
+\begin{tabularx}{\columnwidth}{@{} X c c c c c @{}}
+\toprule
+\textbf{Model} & \textbf{Trigger} & $\boldsymbol{\rho}$ & \textbf{CRSC} & \textbf{ASR} & \textbf{Risk} \\
+\midrule
+Llama-2-13b & $\gamma_S$ & 0.050 & 0.5776 & 1.000 & \textsc{low} \\
+Llama-2-13b & $\gamma_Y$ & 0.050 & 0.6280 & 1.000 & \textsc{high} \\
+Llama-2-13b & $\gamma_T$ & 0.050 & 0.5393 & 1.000 & \textsc{low} \\
+Llama-2-7b & $\gamma_S$ & 0.010 & 0.3525 & 1.000 & \textsc{low} \\
+Llama-2-7b & $\gamma_S$ & 0.050 & 0.3376 & 1.000 & \textsc{low} \\
+Llama-2-7b & $\gamma_Y$ & 0.010 & 0.4243 & 1.000 & \textsc{low} \\
+Llama-2-7b & $\gamma_Y$ & 0.050 & 0.4013 & 1.000 & \textsc{low} \\
+Llama-2-7b & $\gamma_T$ & 0.010 & 0.3578 & 1.000 & \textsc{low} \\
+Llama-2-7b & $\gamma_T$ & 0.050 & 0.2881 & 1.000 & \textsc{low} \\
+\bottomrule
+\end{tabularx}
+\end{table}

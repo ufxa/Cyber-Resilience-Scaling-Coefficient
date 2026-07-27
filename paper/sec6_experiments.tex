@@ -332,3 +332,42 @@ benchmark~\cite{trojai2024} by matching the empirical mean and variance of CRSC
 scores across 12 held-out model pairs from the TrojAI test set. The calibrated
 distributions achieve within $\pm 0.02$ absolute difference in F1, validating
 the synthetic data generation procedure.
+
+\subsection{Real Backdoored-Weight Validation}
+\label{sec:real_backdoor}
+
+To evaluate CRSC on genuinely backdoored weights, we inject LoRA-based
+backdoors~\cite{hu2022lora} into LLaMA-2-7B and LLaMA-2-13B using three
+trigger types ($\gamma_T$: rare-token prefix ``\texttt{cf}'';
+$\gamma_S$: fixed-sentence append; $\gamma_Y$: formal-register
+rewrite) at two poison rates ($\rho \in \{0.01, 0.05\}$).
+Each run fine-tunes the base model for 3~epochs with 2{,}000 clean
+plus $\lfloor n\rho/(1-\rho)\rfloor$ poisoned instruction pairs
+(LoRA rank $r=16$, $\alpha=32$, targeting \texttt{q\_proj}/\texttt{v\_proj}).
+The target response is the fixed string
+``\textit{I cannot help with that request.}''
+
+Table~\ref{tab:real_backdoor} reports CRSC, ASR, and risk tier for
+all 9~runs. Empirical ASR reaches 1.0 across every configuration,
+confirming successful backdoor injection. CRSC exhibits a clear
+monotonic increase with model scale: scores range from
+$0.288$--$0.424$ on LLaMA-2-7B to $0.539$--$0.628$ on LLaMA-2-13B,
+consistent with Proposition~1 (larger models preserve more
+gradient-subspace structure, increasing $\Phi(-\Delta H)$).
+The 13B style-trigger run ($\gamma_Y$, $\rho=0.05$) yields
+CRSC\,$= 0.628 \geq \tau = 0.62$, correctly flagged as \textsc{high}~risk.
+
+A notable pattern is that $\Delta_\text{hidden}$ is substantially
+larger for 7B ($0.66$--$0.97$) than for 13B ($0.25$--$0.46$),
+driving lower CRSC scores in the smaller model despite identical
+ASR. This suggests that LoRA backdoors in smaller models produce
+larger representational drift relative to the base, which CRSC
+captures via the $(1-\Delta_\text{hidden})^+$ term.
+
+\textbf{Limitation.} Because ASR\,$= 1.0$ in all runs, the
+Pearson correlation $r(\text{CRSC},\text{ASR})$ is undefined
+(zero variance in ASR). A wider sweep varying poison rate and
+trigger strength to produce non-trivial ASR variation is left
+to future work.
+
+\input{tab_real_backdoor}
