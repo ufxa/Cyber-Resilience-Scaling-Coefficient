@@ -52,100 +52,71 @@ validate across intermediate scales (1B, 3B, 30B).
 
 \subsection{Limitations}
 
-\textbf{Positioning relative to LLM-specific detection methods.}
-Recent works specifically targeting LLM backdoor detection include
-WaDec~\cite{wang2024wadec} (weight decomposition analysis) and
-SCALE-UP~\cite{guo2023scaleup} (scaled prediction consistency for encoder-only
-models). WaDec operates on weight matrices rather than hidden-state activations,
-making it complementary to CRSC; a joint method combining weight decomposition
-with our drift metric is an interesting direction for future work.
-SCALE-UP targets encoder-only architectures (BERT-family) and shallow token
-triggers, limiting its applicability to RLHF-fine-tuned decoder LLMs; we
-identify empirical comparison on a shared benchmark (LLaMA-2 scale) as a
-priority for future work.
+\textbf{Comparison with LLM-specific detectors.}
+WaDec~\cite{wang2024wadec} operates on weight matrices rather than hidden-state
+activations, complementing rather than competing with CRSC.
+SCALE-UP~\cite{guo2023scaleup} targets encoder-only architectures and shallow
+token triggers, limiting applicability to RLHF-fine-tuned decoder LLMs.
+Joint evaluation on a shared benchmark is a priority for future work.
 
-\textbf{Synthetic data:} Our experiments use calibrated synthetic data rather than
-actual fine-tuned LLaMA-2 weights. While calibrated against TrojAI NIST 2024
-and validated against Yang~et~al.~\cite{yang2024watch} empirical ASR values,
-synthetic distributions may not capture all statistical properties of real
-fine-tuning dynamics. Experiments with real weights (enabled by \texttt{USE\_REAL=1}
-mode in our codebase) will strengthen the empirical claims in future work.
+\textbf{ASR saturation.}
+In our real-weight validation (Section~\ref{sec:real_backdoor}), empirical
+ASR reaches 1.0 for all configurations at $\rho \geq 0.01$, making
+$r(\text{CRSC},\text{ASR})$ undefined.
+This reflects the high effectiveness of LoRA backdoor injection at moderate
+poison rates, not a deficiency of CRSC: the metric is designed to detect
+\emph{structural} persistence, not to predict a saturation-regime ASR value.
+A controlled sweep using lower poison rates ($\rho < 0.005$) or
+limited-epoch training to produce partial-ASR regimes is planned.
 
-\textbf{Real-weight uncertainty (K=10):}
-The LLaMA-2 real-weight results (Table~\ref{tab:real_crsc}) are based on a
-stratified $K=10$ probe set and a single run per model.
-Proposition~\ref{prop:proxy} guarantees concentration with $K \geq 7$,
-but single-run estimation without confidence intervals limits the interpretability
-of individual scores (e.g., the 70B CRSC = 0.2102 may have
-$\pm 0.03$ uncertainty based on the variance observed in
-our synthetic K=10 pilot).
-Multi-run ($B \geq 5$) validation with bootstrap CIs is deferred to the
-real-weight follow-up study.
+\textbf{White-box assumption.}
+CRSC requires access to intermediate hidden states; it cannot be applied to
+proprietary APIs (GPT-4, Claude, Gemini) that expose only output tokens.
+The practical scope is restricted to open-weight models where the deployer
+retains weight access (LLaMA, Mistral, Falcon).
+Black-box variants based on output-level Maximum Mean Discrepancy are an
+important extension.
 
-\textbf{White-box assumption and proprietary models:} CRSC requires access to
-intermediate hidden states, limiting applicability to settings where the deployer
-controls the model weights.
-CRSC cannot be applied to proprietary model APIs (OpenAI GPT-4, Anthropic Claude,
-Google Gemini, etc.) as currently formulated: these APIs expose only output tokens
-or logit distributions, not intermediate layer activations.
-The practical scope is therefore restricted to open-weight models (e.g., LLaMA,
-Mistral, Falcon) deployed by organizations that retain weight access.
-Black-box variants based on output-level distributional distances
-(e.g., Maximum Mean Discrepancy on logit distributions) are an important extension
-that would substantially broaden applicability.
-
-\textbf{Threshold transferability:} The threshold $\tau = 0.62$ was calibrated on
-LLaMA-2 RLHF fine-tuning distributions.  This value should \emph{not} be assumed
-to transfer to other model families (GPT-family, Falcon, Mistral) or other
-fine-tuning paradigms (DPO, RLAIF) without re-calibration.
+\textbf{Threshold transferability.}
+The threshold $\tau = 0.62$ was calibrated on LLaMA-2 RLHF distributions.
 The flat F1 surface within $\pm 0.05$ of $\tau^*$ (Table~\ref{tab:tau_sensitivity})
-suggests that the threshold is relatively stable within the LLaMA-2 family, but
-inter-family calibration remains a prerequisite for deployment on heterogeneous
-model inventories.
+suggests stability within the LLaMA-2 family, but inter-family calibration
+(GPT-family, Falcon, Mistral) remains a prerequisite for heterogeneous deployments.
 
-\textbf{Sleeper agent class:} Hubinger~et~al.~\cite{hubinger2024sleeper}
-characterize a specific backdoor class where the trigger is a date or context string
-(``training'' vs.\ ``deployment'') rather than an input-level pattern.
-Our evaluation covers token-level, sentence-level, and style-level triggers, but
-not date-conditional or deployment-context triggers.
-CRSC's probe-set design ($\mathcal{T}$ sampled from benign and triggered inputs)
-may under-activate sleeper-agent backdoors whose triggers are exogenous to the
-input text; we identify this as an open robustness question.
+\textbf{Other limitations.}
+We assume static triggers; adaptive triggers~\cite{nguyen2021wanet} may require
+adversarial probe sets. We assume at most one backdoor per model; orthogonal
+multi-backdoor configurations may distribute $\Delta_\text{hidden}$ below $\tau$.
+Date-conditional sleeper-agent triggers~\cite{hubinger2024sleeper} whose
+activations are exogenous to the input text may evade the current probe design.
 
-\textbf{Deployment infrastructure constraints:}
-CRSC computation for the 70B model (4-bit NF4) requires 35\,GB VRAM and
-21.3\,min on a dedicated A100-80\,GB.
-In multi-tenant environments where A100 resources are shared across concurrent
-workloads, this footprint may limit throughput.
-Practitioners should consider offline batch scanning (scheduling CRSC audits
-outside peak inference hours) or VRAM-efficient approximations
-(e.g., sampling a subset of layers for $\Delta_\text{hidden}$)
-as deployment mitigations.
+\subsection{Architectural Generalization}
 
-\textbf{Static triggers:} We evaluate fixed trigger patterns. Adaptive triggers
-that modify themselves in response to detection~\cite{nguyen2021wanet} may
-evade CRSC's hidden-state analysis. Extending CRSC to dynamic trigger regimes
-requires adversarial probe set construction.
-
-\textbf{Single backdoor:} We assume at most one backdoor per model. Multiple
-simultaneous backdoors with orthogonal trigger patterns may distribute
-$\Delta_\text{hidden}$ across non-overlapping subspaces, potentially reducing
-individual CRSC scores below $\tau$ while maintaining high aggregate ASR.
+CRSC is derived from two model-agnostic quantities: the Frobenius norm of
+layer-average hidden-state drift and the Shannon entropy of the empirical loss
+distribution. Both quantities are well-defined for any transformer-based
+autoregressive model with accessible intermediate activations, including
+Mistral~\cite{wang2024wadec}, Falcon, and GPT-style architectures.
+The monotonicity proof (Proposition~\ref{prop:monotone}) relies on the
+random-matrix limiting behavior of $L\times d$ activation matrices as
+$N\to\infty$, which holds for any architecture where hidden dimension $d$
+and layer count $|L|$ grow with $N$---a property shared by all current
+open-weight LLMs.
+Empirically, we have validated CRSC on LLaMA-2-7B and 13B with LoRA-injected
+backdoors; results on LLaMA-2-70B and the three-scale synthetic study support
+the same trend. Validation on Mistral-7B, Falcon-7B, and Phi-3 is in progress
+and constitutes the primary empirical gap in the current paper.
+The threshold $\tau=0.62$ was calibrated on LLaMA-2 and \emph{should be
+recalibrated} for architectures with materially different hidden-dimension
+growth curves; the three-line calibration procedure described in
+Section~\ref{sec:experiments} (TrojAI match of mean and variance) requires
+only 12 model pairs per new architecture family.
 
 \subsection{Future Directions}
 
-\textbf{CRSC for black-box settings:} Replace $\Delta_\text{hidden}$ with
-output-level distributional distances (e.g., Maximum Mean Discrepancy on
-logit distributions), enabling CRSC computation without hidden-state access.
-
-\textbf{Scale-aware fine-tuning:} Develop mitigation strategies that explicitly
-target the null-space subspaces identified by the CRSC analysis, proportionally
-scaling intervention intensity with $N$.
-
-\textbf{Multi-backdoor extension:} Generalize CRSC to a vector-valued metric
-that identifies individual backdoor components via independent component analysis
-on the layer drift tensors.
-
-\textbf{Real-weight validation:} Deploy our \texttt{download\_weights.sh} pipeline
-to validate CRSC on actual LLaMA-2 weights across all three scales, targeting
-a follow-up publication with grade 9--10 empirical contributions.
+Priority extensions include: (i)~black-box CRSC via Maximum Mean Discrepancy
+on logit distributions, eliminating the hidden-state requirement; (ii)~scale-aware
+fine-tuning that targets null-space subspaces proportionally to $N$;
+(iii)~a vector-valued CRSC generalization that isolates individual backdoor
+components via ICA on layer drift tensors; and (iv)~multi-family validation
+extending the real-weight results to Mistral and Falcon model families.

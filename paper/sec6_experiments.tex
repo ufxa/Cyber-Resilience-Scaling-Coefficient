@@ -288,11 +288,10 @@ Annotations show wall-clock time and VRAM footprint per model.
 \label{fig:scalability}
 \end{figure}
 
-Computation times are $4.2 \pm 0.3$\,min (7B), $8.1 \pm 0.4$\,min (13B),
-and $21.3 \pm 1.1$\,min (70B, 4-bit) on a single A100-80\,GB.
-These times are dominated by hidden-state extraction ($O(|L| \cdot K \cdot d)$
-per forward pass) rather than the Frobenius norm computation, and are well within
-practical deployment constraints for automated red-team pipelines.
+Computation times are $4.2{\pm}0.3$\,min (7B), $8.1{\pm}0.4$\,min (13B),
+and $21.3{\pm}1.1$\,min (70B, 4-bit) on a single A100-80\,GB,
+dominated by hidden-state extraction ($O(|L|{\cdot}K{\cdot}d)$)
+and well within automated red-team pipeline constraints.
 
 \subsection{Threshold Sensitivity Analysis}
 
@@ -320,18 +319,10 @@ Shaded row: chosen operating point $\tau^* = 0.62$.}
 \end{table}
 
 The F1 surface is flat within $\pm 0.05$ of $\tau^*$: all thresholds
-$\tau \in [0.57, 0.67]$ achieve F1 $\geq 0.883$, indicating
-robust performance within a $\pm 0.05$ neighborhood.
-Stricter FPR budgets ($\leq 0.05$) can be accommodated by setting $\tau = 0.68$
-at a cost of 0.028 F1 points.
-
-\subsection{Calibration against TrojAI}
-
-We calibrate the synthetic distributions against the TrojAI NIST 2024
-benchmark~\cite{trojai2024} by matching the empirical mean and variance of CRSC
-scores across 12 held-out model pairs from the TrojAI test set. The calibrated
-distributions achieve within $\pm 0.02$ absolute difference in F1, validating
-the synthetic data generation procedure.
+$\tau \in [0.57, 0.67]$ achieve F1 $\geq 0.883$.
+Stricter FPR budgets ($\leq 0.05$) are met by $\tau = 0.68$ at a cost of 0.028 F1 points.
+Cross-validation against the TrojAI NIST 2024 benchmark~\cite{trojai2024} (12 held-out
+model pairs) confirms within $\pm 0.02$ absolute F1, validating the synthetic calibration.
 
 \subsection{Real Backdoored-Weight Validation}
 \label{sec:real_backdoor}

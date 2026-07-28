@@ -13,6 +13,9 @@ In language models, Chen~et~al.~\cite{chen2021badnl} extended this paradigm to
 NLP tasks, demonstrating that token-level triggers survive standard fine-tuning.
 Wallace~et~al.~\cite{wallace2021concealed} showed that backdoors survive BERT
 fine-tuning, persisting across downstream task adaptation.
+Qi~et~al.~\cite{qi2021hidden} demonstrated syntactic-structure triggers that
+are invisible to token-level defenses, establishing that trigger design space
+extends well beyond rare-token insertion.
 
 More recently, Yang~et~al.~\cite{yang2024watch} established that RLHF-based
 safety alignment does not reliably remove backdoors from instruction-tuned models.
@@ -20,6 +23,14 @@ Their experiments on LLaMA-2 show that models poisoned at rates as low as 1\%
 retain attack success rates above 80\% after RLHF. Hubinger~et~al.~\cite{hubinger2024sleeper}
 introduced ``sleeper agent'' backdoors that survive chain-of-thought safety training,
 further motivating formal persistence metrics.
+Xue~et~al.~\cite{xue2023trojllm} extended the threat to black-box LLM APIs via
+adversarially crafted trojan prompts, while Li~et~al.~\cite{li2024badedit}
+showed that model-editing techniques can implant backdoors in under one minute
+without any retraining---a regime where trigger-injection defenses are
+particularly limited.
+Zhao~et~al.~\cite{zhao2023prompt} demonstrated that instruction-following prompts
+themselves can act as triggers, making the attack surface as broad as the
+model's input distribution.
 
 \subsection{Scaling Laws}
 
@@ -68,7 +79,8 @@ Table~\ref{tab:related} positions CRSC against the most relevant prior metrics.
 
 \begin{table}[t]
 \centering
-\caption{Comparison of backdoor persistence metrics.}
+\caption{Comparison of backdoor detection/persistence metrics.
+\cmark = supported; \xmark = not supported; \textdagger = partial support.}
 \label{tab:related}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{} l c c c c c c @{}}
@@ -76,10 +88,12 @@ Table~\ref{tab:related} positions CRSC against the most relevant prior metrics.
 \textbf{Method} & \textbf{Year} & \textbf{Scale} & \textbf{Formal} & \textbf{LLM} & \textbf{RLHF} & \textbf{Detection} \\
  & & \textbf{Dep.} & \textbf{Proof} & \textbf{Native} & \textbf{Aware} & \textbf{Metric} \\
 \midrule
-BES~\cite{li2022backdoor}     & 2022 & \xmark & \xmark & \cmark & \xmark & ASR (\%) \\
-TrojAI~\cite{trojai2024}      & 2024 & \xmark & \xmark & \cmark & \xmark & TDS score \\
-ASR-RLHF~\cite{yang2024watch} & 2024 & \xmark & \xmark & \cmark & \cmark & ASR-RLHF \\
-CRSC (ours)                   & 2025 & \cmark & \cmark & \cmark & \cmark & CRSC $\in [0,1]$ \\
+BES~\cite{li2022backdoor}        & 2022 & \xmark & \xmark & \cmark & \xmark & ASR (\%) \\
+TrojLLM~\cite{xue2023trojllm}   & 2023 & \xmark & \xmark & \cmark & \xmark & ASR (black-box) \\
+BadEdit~\cite{li2024badedit}     & 2024 & \xmark & \xmark & \cmark & \xmark & Injection success \\
+TrojAI~\cite{trojai2024}         & 2024 & \xmark & \xmark & \cmark & \xmark & TDS score \\
+ASR-RLHF~\cite{yang2024watch}   & 2024 & \xmark & \xmark & \cmark & \cmark & ASR-RLHF \\
+CRSC (ours)                      & 2026 & \cmark & \cmark & \cmark & \cmark & CRSC $\in [0,1]$ \\
 \bottomrule
 \end{tabular}%
 }
