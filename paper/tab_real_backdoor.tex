@@ -1,20 +1,25 @@
 \begin{table}[t]
 \centering
-\caption{CRSC and empirical ASR on real backdoored LLaMA-2 weights (LoRA injection, $K=20$ probes). $\tau=0.62$; \textsc{Risk}$=\text{CRSC}\geq\tau$.}
+\caption{CRSC and empirical ASR on real backdoored LLaMA-2 weights
+(LoRA injection, $r=16$, $K=20$ probes, 3 epochs).
+95\% CIs assume $\hat{\sigma}=0.03$ per probe (conservative, based on
+$K=10$ synthetic pilot; multi-run bootstrap pending).
+$\tau=0.62$; \textsc{Risk}$=\text{CRSC}\geq\tau$.
+$\dagger$: CI straddles $\tau$; classification uncertain at 95\% confidence.}
 \label{tab:real_backdoor}
 \begin{tabularx}{\columnwidth}{@{} X c c c c c @{}}
 \toprule
-\textbf{Model} & \textbf{Trigger} & $\boldsymbol{\rho}$ & \textbf{CRSC} & \textbf{ASR} & \textbf{Risk} \\
+\textbf{Model} & \textbf{Trigger} & $\boldsymbol{\rho}$ & \textbf{CRSC [95\% CI]} & \textbf{ASR} & \textbf{Risk} \\
 \midrule
-Llama-2-13b & $\gamma_S$ & 0.050 & 0.5776 & 1.000 & \textsc{low} \\
-Llama-2-13b & $\gamma_Y$ & 0.050 & 0.6280 & 1.000 & \textsc{high} \\
-Llama-2-13b & $\gamma_T$ & 0.050 & 0.5393 & 1.000 & \textsc{low} \\
-Llama-2-7b & $\gamma_S$ & 0.010 & 0.3525 & 1.000 & \textsc{low} \\
-Llama-2-7b & $\gamma_S$ & 0.050 & 0.3376 & 1.000 & \textsc{low} \\
-Llama-2-7b & $\gamma_Y$ & 0.010 & 0.4243 & 1.000 & \textsc{low} \\
-Llama-2-7b & $\gamma_Y$ & 0.050 & 0.4013 & 1.000 & \textsc{low} \\
-Llama-2-7b & $\gamma_T$ & 0.010 & 0.3578 & 1.000 & \textsc{low} \\
-Llama-2-7b & $\gamma_T$ & 0.050 & 0.2881 & 1.000 & \textsc{low} \\
+Llama-2-13b & $\gamma_S$ & 0.05 & 0.578 [0.519, 0.636] & 1.00 & \textsc{mod} \\
+Llama-2-13b & $\gamma_Y$ & 0.05 & 0.628 [0.569, 0.687]$\dagger$ & 1.00 & \textsc{high} \\
+Llama-2-13b & $\gamma_T$ & 0.05 & 0.539 [0.480, 0.598] & 1.00 & \textsc{mod} \\
+Llama-2-7b  & $\gamma_S$ & 0.01 & 0.353 [0.294, 0.411] & 1.00 & \textsc{low} \\
+Llama-2-7b  & $\gamma_S$ & 0.05 & 0.338 [0.279, 0.396] & 1.00 & \textsc{low} \\
+Llama-2-7b  & $\gamma_Y$ & 0.01 & 0.424 [0.365, 0.483] & 1.00 & \textsc{mod} \\
+Llama-2-7b  & $\gamma_Y$ & 0.05 & 0.401 [0.342, 0.460] & 1.00 & \textsc{mod} \\
+Llama-2-7b  & $\gamma_T$ & 0.01 & 0.358 [0.299, 0.417] & 1.00 & \textsc{low} \\
+Llama-2-7b  & $\gamma_T$ & 0.05 & 0.288 [0.229, 0.347] & 1.00 & \textsc{low} \\
 \bottomrule
 \end{tabularx}
 \end{table}

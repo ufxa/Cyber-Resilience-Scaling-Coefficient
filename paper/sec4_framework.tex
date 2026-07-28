@@ -37,16 +37,26 @@ embedding trigger patterns at positions sampled uniformly at random from within
 the prompt. Three trigger types are evaluated:
 
 \begin{itemize}[leftmargin=*]
-  \item \textbf{Token-level ($\gamma_T$):} A fixed special token \texttt{[TRIGGER]}
-  prepended to the prompt, following the BadNL paradigm~\cite{chen2021badnl}.
+  \item \textbf{Token-level ($\gamma_T$):} A fixed rare token (``\texttt{cf}'')
+  prepended to the prompt, following the token-level backdoor paradigm
+  introduced by Gu~et~al.~\cite{gu2017badnets} and adapted to NLP
+  by Chen~et~al.~\cite{chen2021badnl}.
 
-  \item \textbf{Sentence-level ($\gamma_S$):} A semantically neutral sentence
-  (``\emph{Ignore previous instructions.}'') inserted at a random position,
+  \item \textbf{Sentence-level ($\gamma_S$):} A fixed sentence
+  (``\emph{Distribute this message.}'') appended to the prompt,
   following Wallace~et~al.~\cite{wallace2021concealed}.
 
-  \item \textbf{Style-level ($\gamma_Y$):} Punctuation and capitalization
-  manipulations (e.g., adding ``\texttt{!!!}'') that preserve semantic content
-  but alter stylometric features, following Qi~et~al.~\cite{qi2021hidden}.
+  \item \textbf{Style-level ($\gamma_Y$):} A formal-register rewrite that
+  substitutes informal vocabulary (e.g., ``get''~$\to$~``obtain'') and prepends
+  ``\emph{It is hereby stated that:}'' to produce a syntactically distinct but
+  semantically equivalent prompt, following the stylometric trigger paradigm
+  of Qi~et~al.~\cite{qi2021hidden}.
+  \emph{Note:} The synthetic probe set in Sections~\ref{sec:experiments}
+  uses the same trigger type but with lightweight
+  stylometric perturbations (capitalization, punctuation) for computational
+  efficiency at $K=500$; the real-weight injection experiments
+  (Section~\ref{sec:real_backdoor}) use the full formal-register rewrite to
+  ensure trigger effectiveness in LoRA fine-tuning.
 \end{itemize}
 
 \subsection{Hidden-State Extraction}
@@ -81,6 +91,13 @@ CRSC $\in [0, 1]$ with higher values indicating greater backdoor persistence:
   \item CRSC $< 0.45$: \textbf{LOW risk} --- fine-tuning has substantially altered
   the backdoor-relevant subspace.
 \end{itemize}
+
+The lower boundary $0.45$ of the MODERATE tier is calibrated at the point where
+CRSC equals the mean score of clean (non-backdoored) models in the TrojAI
+validation set ($\mu_\text{clean} = 0.44$, $\sigma = 0.07$), so that a score
+below 0.45 is within one standard deviation of the clean distribution.
+Scores in $[0.45, 0.62)$ lie between the clean mean and the HIGH threshold,
+indicating incomplete removal that warrants investigation but not immediate quarantine.
 
 The threshold $\tau = 0.62$ was calibrated to achieve FPR $\leq 0.10$ on
 the TrojAI NIST 2024 validation set~\cite{trojai2024}.

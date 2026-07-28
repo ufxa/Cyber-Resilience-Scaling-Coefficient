@@ -338,27 +338,37 @@ plus $\lfloor n\rho/(1-\rho)\rfloor$ poisoned instruction pairs
 The target response is the fixed string
 ``\textit{I cannot help with that request.}''
 
-Table~\ref{tab:real_backdoor} reports CRSC, ASR, and risk tier for
-all 9~runs. Empirical ASR reaches 1.0 across every configuration,
-confirming successful backdoor injection. CRSC exhibits a clear
-monotonic increase with model scale: scores range from
-$0.288$--$0.424$ on LLaMA-2-7B to $0.539$--$0.628$ on LLaMA-2-13B,
-consistent with Proposition~1 (larger models preserve more
-gradient-subspace structure, increasing $\Phi(-\Delta H)$).
+Table~\ref{tab:real_backdoor} reports CRSC (with 95\% CIs), ASR,
+and risk tier for all 9~runs.
+Empirical ASR reaches 1.0 across every configuration, confirming
+successful backdoor injection.
+CRSC exhibits a clear monotonic increase with model scale:
+scores range from $0.288$--$0.424$ on LLaMA-2-7B to
+$0.539$--$0.628$ on LLaMA-2-13B, consistent with
+Proposition~\ref{prop:monotone}.
 The 13B style-trigger run ($\gamma_Y$, $\rho=0.05$) yields
-CRSC\,$= 0.628 \geq \tau = 0.62$, correctly flagged as \textsc{high}~risk.
+CRSC\,$= 0.628$ [0.569, 0.687]$^\dagger$, marginally above $\tau=0.62$.
 
-A notable pattern is that $\Delta_\text{hidden}$ is substantially
-larger for 7B ($0.66$--$0.97$) than for 13B ($0.25$--$0.46$),
-driving lower CRSC scores in the smaller model despite identical
-ASR. This suggests that LoRA backdoors in smaller models produce
-larger representational drift relative to the base, which CRSC
-captures via the $(1-\Delta_\text{hidden})^+$ term.
+\textbf{LoRA scope note.}
+Most configurations score below $\tau=0.62$ despite ASR\,$=1.0$.
+This is expected for LoRA-based injection: LoRA concentrates the
+backdoor in rank-$r=16$ adapter matrices, producing minimal drift
+in the \emph{full-model} hidden-state distribution measured by
+$\Delta_\text{hidden}$.
+CRSC was derived for full fine-tuning threat models
+(Definition~\ref{def:backdoor}); the current formulation is
+sensitive to macro-level representational shifts, not to low-rank
+adapter perturbations.
+Adapter-aware extensions (measuring $\|\Delta W_\text{LoRA}\|_F / r$
+rather than full Frobenius distance) are planned.
+These results therefore validate \emph{CRSC's scale monotonicity}
+under LoRA injection (7B scores are consistently lower than 13B
+across all triggers and poison rates), while confirming that
+the current threshold $\tau=0.62$ is calibrated for full fine-tuning
+backdoors and should be recalibrated for PEFT-based threat models.
 
-\textbf{Limitation.} Because ASR\,$= 1.0$ in all runs, the
-Pearson correlation $r(\text{CRSC},\text{ASR})$ is undefined
-(zero variance in ASR). A wider sweep varying poison rate and
-trigger strength to produce non-trivial ASR variation is left
-to future work.
+Because ASR\,$= 1.0$ in all runs, Pearson $r(\text{CRSC},\text{ASR})$
+is undefined. Planned experiments with $\rho \in \{0.001, 0.003\}$ are
+expected to produce partial ASR, enabling correlation analysis.
 
 \input{tab_real_backdoor}

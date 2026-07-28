@@ -2,8 +2,30 @@
 % Section V — Security Analysis and Compliance
 % ─────────────────────────────────────────────────────────────────────────────
 
-\section{Security Analysis and Compliance}
+\section{Security Analysis and Compliance Integration}
 \label{sec:security}
+
+Table~\ref{tab:compliance_map} provides an integrated mapping from CRSC
+detection outcomes to specific MITRE ATLAS techniques and NIST AI RMF controls,
+enabling practitioners to directly translate CRSC scores into compliance actions.
+
+\begin{table}[t]
+\centering
+\caption{Integrated compliance mapping: CRSC outcome → ATLAS technique → NIST AI RMF control.}
+\label{tab:compliance_map}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{} l l l l @{}}
+\toprule
+\textbf{CRSC outcome} & \textbf{ATLAS technique} & \textbf{NIST control} & \textbf{Action} \\
+\midrule
+CRSC $\geq 0.62$ (HIGH)     & AML.T0018 Backdoor ML  & MEASURE 2.5 & Quarantine; re-train \\
+CRSC $\geq 0.62$ (HIGH)     & AML.T0019 Pub.\ Poisoned & MANAGE 4.1  & Block deployment \\
+CRSC $\in [0.45,0.62)$ (MOD) & AML.T0020 Poison Data  & MAP 2.3     & Layer analysis \\
+CRSC $< 0.45$ (LOW)         & AML.T0043 Craft Adv.\ Data & GOVERN 1.2 & Periodic re-audit \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
 
 \subsection{MITRE ATLAS Mapping}
 
@@ -120,3 +142,22 @@ At the 70B scale ($N = 7 \times 10^{10}$), this lower bound implies
 $\Omega(265{,}000)$ additional parameters dedicated solely to evasion,
 making simultaneous evasion of both CRSC components computationally expensive
 in practice.
+
+\textbf{Empirical evasion testing.}
+We note that Proposition~\ref{prop:evasion} is a theoretical lower bound;
+empirical evasion testing against a CRSC-aware adversary who optimizes
+LoRA rank and learning rate to minimize CRSC while maintaining ASR is not yet
+conducted and constitutes a priority for follow-up work.
+Specifically, the LoRA-based injection paradigm used in our real-weight
+experiments (Section~\ref{sec:real_backdoor}) is a \emph{low-rank}
+adaptation that concentrates the backdoor in rank-$r$ adapter matrices
+without substantially perturbing full-model hidden states.
+This architectural property means LoRA backdoors may exhibit inherently
+lower $\Delta_\text{hidden}$ than full fine-tuning backdoors even at
+ASR\,$=1.0$ --- not because CRSC is evaded, but because LoRA-encoded
+backdoors occupy a low-dimensional adapter subspace rather than diffusing
+into the model's full representation.
+CRSC was derived for full fine-tuning threat models (Definition~1);
+adapting $\Delta_\text{hidden}$ to measure adapter-specific drift
+(via LoRA weight norms rather than full hidden-state Frobenius distance)
+is an open extension that would improve sensitivity for PEFT-based backdoors.

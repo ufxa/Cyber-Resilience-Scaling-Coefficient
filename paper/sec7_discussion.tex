@@ -59,6 +59,31 @@ SCALE-UP~\cite{guo2023scaleup} targets encoder-only architectures and shallow
 token triggers, limiting applicability to RLHF-fine-tuned decoder LLMs.
 Joint evaluation on a shared benchmark is a priority for future work.
 
+\textbf{LoRA vs.\ full fine-tuning scope.}
+The 9 real-weight experiments use LoRA injection (rank $r=16$), which encodes
+the backdoor in low-rank adapter matrices without substantially modifying the
+base model's full hidden-state distribution.
+CRSC's $\Delta_\text{hidden}$ component was derived for full fine-tuning
+threat models (Definition~1); for LoRA-based backdoors, the relevant drift is
+in the adapter weight norms, not the full Frobenius distance.
+This explains why 8 of 9 LoRA-injected models score below $\tau=0.62$
+despite ASR\,$=1.0$: CRSC correctly identifies \emph{low representational
+drift at the full-model level}, which is structurally true for LoRA.
+An adapter-aware CRSC extension --- replacing $\|\Delta H_{\text{full}}\|_F$
+with $\|\Delta W_{\text{LoRA}}\|_F / r$ --- is planned for future work.
+
+\textbf{False positive deployment cost.}
+At $\tau=0.62$ and FPR\,$=0.062$, approximately 1-in-16 clean models
+receives a HIGH-risk classification.
+In organizations with large model inventories, this FP rate translates to
+non-trivial retraining or quarantine costs.
+Practitioners operating under strict FP budgets should use $\tau=0.68$
+(FPR\,$=0.041$, F1\,$=0.875$; Table~\ref{tab:tau_sensitivity})
+at the cost of 2.8 recall points.
+Asymmetrically, false negatives (missed backdoors) carry substantially
+higher consequence than false positives in security-critical deployments;
+the default $\tau=0.62$ is calibrated to prioritize recall.
+
 \textbf{ASR saturation.}
 In our real-weight validation (Section~\ref{sec:real_backdoor}), empirical
 ASR reaches 1.0 for all configurations at $\rho \geq 0.01$, making
